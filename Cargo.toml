@@ -5,3 +5,8 @@ authors = ["Orhun Parmaksız <orhunparmaksiz@gmail.com>"]
 edition = "2024"
 
 [dependencies]
+cpal = "0.15.3"
+pitchy = "0.1.1"
+ratatui = "0.29.0"
+rustfft = "6.3.0"
+tui-big-text = "0.7.1"
