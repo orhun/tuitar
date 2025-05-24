@@ -72,11 +72,10 @@ impl Recorder {
 
 struct Transform {
     fft_samples: Vec<Complex<f64>>,
-    sample_rate: f64,
 }
 
 impl Transform {
-    fn new(samples: Vec<i16>, sample_rate: f64) -> Self {
+    fn new(samples: Vec<i16>) -> Self {
         let samples_f64: Vec<f64> = samples.iter().map(|&s| s as f64).collect();
 
         let mut planner = FftPlanner::new();
@@ -89,11 +88,10 @@ impl Transform {
 
         Self {
             fft_samples: fft_input,
-            sample_rate,
         }
     }
 
-    fn find_fundamental_frequency(&self) -> f64 {
+    fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
         let mut max_magnitude = 0.0;
         let mut fundamental_freq = 0.0;
 
@@ -101,25 +99,30 @@ impl Transform {
             let magnitude = sample.norm();
             if magnitude > max_magnitude {
                 max_magnitude = magnitude;
-                fundamental_freq = i as f64 * self.sample_rate / self.fft_samples.len() as f64;
+                fundamental_freq = i as f64 * sample_rate / self.fft_samples.len() as f64;
             }
         }
 
         fundamental_freq
     }
 
-    pub fn note(&self) -> Note {
-        let fundamental_freq = self.find_fundamental_frequency();
+    pub fn note(&self, sample_rate: u32) -> Note {
+        let fundamental_freq = self.find_fundamental_frequency(sample_rate as f64);
         Note::new(fundamental_freq)
     }
 
-    pub fn fft_data(&self) -> Vec<(f64, f64)> {
+    pub fn fft_data(&self, sample_rate: f64) -> Vec<(f64, f64)> {
+        let n = self.fft_samples.len();
+        let bin_width = sample_rate / n as f64;
+
         self.fft_samples
             .iter()
+            .take(n / 2) // use only the first half of the spectrum (real signal)
             .enumerate()
-            .map(|(i, &sample)| {
-                let frequency = i as f64 * self.sample_rate / self.fft_samples.len() as f64;
-                (frequency, sample.norm())
+            .map(|(i, c)| {
+                let freq = i as f64 * bin_width;
+                let magnitude = c.norm(); // or use norm_sqr() for power spectrum
+                (freq, magnitude)
             })
             .collect()
     }
@@ -160,8 +163,8 @@ fn draw_waveform(frame: &mut Frame<'_>, samples: &Vec<i16>) {
 }
 
 // TODO: Fix the plotting (use nyquist frequency)
-fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform) {
-    let data_points = transform.fft_data();
+fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform, sample_rate: u32) {
+    let data_points = transform.fft_data(sample_rate as f64);
 
     let dataset = Dataset::default()
         .name("FFT")
@@ -222,10 +225,10 @@ fn main() {
     loop {
         terminal
             .draw(|frame| {
-                let transform = Transform::new(samples.clone(), recorder.sample_rate() as f64);
-                draw_waveform(frame, &samples);
-                // draw_frequency(frame, &transform);
-                draw_note(frame, &transform.note());
+                let transform = Transform::new(samples.clone());
+                // draw_waveform(frame, &samples);
+                draw_frequency(frame, &transform, recorder.sample_rate());
+                draw_note(frame, &transform.note(recorder.sample_rate()));
             })
             .unwrap();
 
