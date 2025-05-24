@@ -4,7 +4,7 @@ use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{Stream, StreamConfig};
 use pitchy::Note;
 use ratatui::Frame;
-use ratatui::crossterm::event::{self, Event};
+use ratatui::crossterm::event::{self, Event, KeyCode};
 use ratatui::layout::{Constraint, Flex, Layout};
 use ratatui::{
     style::{Style, Stylize},
@@ -13,6 +13,7 @@ use ratatui::{
 };
 use rustfft::FftPlanner;
 use rustfft::num_complex::Complex;
+use tui_bar_graph::{BarGraph, BarStyle, ColorMode};
 use tui_big_text::{BigText, PixelSize};
 
 struct Recorder {
@@ -111,20 +112,17 @@ impl Transform {
         Note::new(fundamental_freq)
     }
 
-    pub fn fft_data(&self, sample_rate: f64) -> Vec<(f64, f64)> {
-        let n = self.fft_samples.len();
-        let bin_width = sample_rate / n as f64;
-
-        self.fft_samples
+    pub fn fft_data(&self) -> Vec<f64> {
+        // Only take the first half of the FFT output (the positive frequencies)
+        let half_len = self.fft_samples.len() / 2;
+        let magnitude_spectrum: Vec<f64> = self
+            .fft_samples
             .iter()
-            .take(n / 2) // use only the first half of the spectrum (real signal)
-            .enumerate()
-            .map(|(i, c)| {
-                let freq = i as f64 * bin_width;
-                let magnitude = c.norm(); // or use norm_sqr() for power spectrum
-                (freq, magnitude)
-            })
-            .collect()
+            .take(half_len)
+            .map(|c| c.norm()) // magnitude = sqrt(re^2 + im^2)
+            .collect();
+
+        magnitude_spectrum
     }
 }
 
@@ -162,33 +160,13 @@ fn draw_waveform(frame: &mut Frame<'_>, samples: &Vec<i16>) {
     frame.render_widget(chart, frame.area());
 }
 
-// TODO: Fix the plotting (use nyquist frequency)
-fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform, sample_rate: u32) {
-    let data_points = transform.fft_data(sample_rate as f64);
-
-    let dataset = Dataset::default()
-        .name("FFT")
-        .marker(symbols::Marker::Braille)
-        .graph_type(GraphType::Scatter)
-        .style(Style::default().white())
-        .data(&data_points);
-
-    // let nyquist_frequency = sample_rate as f64 / 2.0;
-    let x_axis = Axis::default()
-        .title("Frequency(Hz)".red())
-        .style(Style::default().white())
-        .bounds([0.0, 22050.0])
-        .labels(vec!["0", "5000", "10000", "15000", "20000"]);
-
-    let y_axis = Axis::default()
-        .title("Magnitude".red())
-        .style(Style::default().white())
-        .bounds([0.0, 100000.0])
-        .labels(vec!["0", "20000", "40000", "60000", "80000"]);
-
-    let chart = Chart::new(vec![dataset]).x_axis(x_axis).y_axis(y_axis);
-
-    frame.render_widget(chart, frame.area());
+fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform) {
+    let data_points = transform.fft_data();
+    let bar_graph = BarGraph::new(data_points)
+        .with_gradient(colorgrad::preset::cool())
+        .with_bar_style(BarStyle::Braille)
+        .with_color_mode(ColorMode::VerticalGradient);
+    frame.render_widget(bar_graph, frame.area());
 }
 
 fn draw_note(frame: &mut Frame<'_>, note: &Note) {
@@ -221,13 +199,21 @@ fn main() {
 
     let mut terminal = ratatui::init();
     let mut samples = Vec::new();
+    let mut mode = 0;
 
     loop {
         terminal
             .draw(|frame| {
                 let transform = Transform::new(samples.clone());
-                // draw_waveform(frame, &samples);
-                draw_frequency(frame, &transform, recorder.sample_rate());
+                match mode {
+                    0 => {
+                        draw_waveform(frame, &samples);
+                    }
+                    1 => {
+                        draw_frequency(frame, &transform);
+                    }
+                    _ => {}
+                }
                 draw_note(frame, &transform.note(recorder.sample_rate()));
             })
             .unwrap();
@@ -237,8 +223,13 @@ fn main() {
         }
 
         if event::poll(std::time::Duration::from_millis(16)).unwrap() {
-            if let Event::Key(_) = event::read().unwrap() {
-                break;
+            if let Event::Key(key) = event::read().unwrap() {
+                match key.code {
+                    KeyCode::Tab => {
+                        mode = (mode + 1) % 2;
+                    }
+                    _ => break,
+                }
             }
         }
     }

@@ -5,8 +5,10 @@ authors = ["Orhun Parmaksız <orhunparmaksiz@gmail.com>"]
 edition = "2024"
 
 [dependencies]
+colorgrad = "0.7.1"
 cpal = "0.15.3"
 pitchy = "0.1.1"
 ratatui = "0.29.0"
 rustfft = "6.3.0"
+tui-bar-graph = "0.1.1"
 tui-big-text = "0.7.1"
