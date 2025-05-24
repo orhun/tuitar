@@ -1,4 +1,5 @@
 use std::sync::mpsc;
+use std::time::{Duration, Instant};
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{Stream, StreamConfig};
@@ -177,10 +178,10 @@ fn draw_note(frame: &mut Frame<'_>, note: &Note) {
             .lines(vec![name.into()])
             .build();
 
-        let [area] = Layout::horizontal([Constraint::Percentage(50)])
+        let [area] = Layout::horizontal([Constraint::Percentage(20)])
             .flex(Flex::Center)
             .areas(frame.area());
-        let [area] = Layout::vertical([Constraint::Percentage(50)])
+        let [area] = Layout::vertical([Constraint::Percentage(20)])
             .flex(Flex::Center)
             .areas(area);
 
