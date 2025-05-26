@@ -7,6 +7,7 @@ use pitchy::Note;
 use ratatui::Frame;
 use ratatui::crossterm::event::{self, Event, KeyCode};
 use ratatui::layout::{Constraint, Flex, Layout};
+use ratatui::widgets::Block;
 use ratatui::{
     style::{Style, Stylize},
     symbols,
@@ -170,6 +171,52 @@ fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform) {
     frame.render_widget(bar_graph, frame.area());
 }
 
+// TODO: needs fixing
+fn draw_frequency_chart(frame: &mut Frame<'_>, transform: &Transform, sample_rate: f64) {
+    let fft_data = transform.fft_data();
+
+    let fft_len = fft_data.len();
+    let freq_step = sample_rate / (2.0 * fft_len as f64); // Nyquist range
+
+    let data_points: Vec<(f64, f64)> = fft_data
+        .iter()
+        .enumerate()
+        .map(|(i, &mag)| {
+            let freq = i as f64 * freq_step;
+            let db = 20.0 * mag.max(1e-10).log10(); // avoid log(0)
+            (freq, db)
+        })
+        .collect();
+
+    let dataset = Dataset::default()
+        .name("Frequency Spectrum")
+        .marker(symbols::Marker::Braille)
+        .graph_type(GraphType::Line)
+        .style(Style::default().cyan())
+        .data(&data_points);
+
+    let x_max = data_points.last().map(|v| v.0).unwrap_or(0.0);
+
+    let x_axis = Axis::default()
+        .title("Frequency (Hz)".red())
+        .style(Style::default().white())
+        .bounds([0.0, x_max])
+        .labels(vec!["0", "1k", "5k", "10k", "20k"]);
+
+    let y_axis = Axis::default()
+        .title("Gain (dB)".red())
+        .style(Style::default().white())
+        .bounds([-100.0, 100.0])
+        .labels(vec!["-100", "-50", "0", "50", "100"]);
+
+    let chart = Chart::new(vec![dataset])
+        .x_axis(x_axis)
+        .y_axis(y_axis)
+        .block(Block::bordered().title("Frequency Spectrum"));
+
+    frame.render_widget(chart, frame.area());
+}
+
 fn draw_note(frame: &mut Frame<'_>, note: &Note) {
     if let Some(name) = note.name() {
         let big_text = BigText::builder()
@@ -213,6 +260,9 @@ fn main() {
                     1 => {
                         draw_frequency(frame, &transform);
                     }
+                    2 => {
+                        draw_frequency_chart(frame, &transform, recorder.sample_rate() as f64);
+                    }
                     _ => {}
                 }
                 draw_note(frame, &transform.note(recorder.sample_rate()));
@@ -227,7 +277,7 @@ fn main() {
             if let Event::Key(key) = event::read().unwrap() {
                 match key.code {
                     KeyCode::Tab => {
-                        mode = (mode + 1) % 2;
+                        mode = (mode + 1) % 3;
                     }
                     _ => break,
                 }
