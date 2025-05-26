@@ -1,12 +1,12 @@
-use pitchy::Note;
-use ratatui::Frame;
-use ratatui::layout::{Constraint, Flex, Layout};
-use ratatui::widgets::Block;
-use ratatui::{
+use mousefood::ratatui::layout::{Constraint, Flex, Layout};
+use mousefood::ratatui::widgets::Block;
+use mousefood::ratatui::Frame;
+use mousefood::ratatui::{
     style::{Style, Stylize},
     symbols,
     widgets::{Axis, Chart, Dataset, GraphType},
 };
+use pitchy::Note;
 use tui_bar_graph::{BarGraph, BarStyle, ColorMode};
 use tui_big_text::{BigText, PixelSize};
 

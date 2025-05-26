@@ -2,13 +2,39 @@
 name = "tuitar"
 version = "0.1.0"
 authors = ["Orhun Parmaksız <orhunparmaksiz@gmail.com>"]
-edition = "2024"
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "tuitar"
+harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true    # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
+
+[features]
+default = []
+
+experimental = ["esp-idf-svc/experimental"]
 
 [dependencies]
+log = "0.4"
+esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+embedded-graphics = "0.8.1"
+mipidsi = "0.9.0"
+embedded-hal = "1.0.0"
+mousefood = "0.2.1"
 colorgrad = "0.7.1"
 cpal = "0.15.3"
 pitchy = "0.1.1"
-ratatui = "0.29.0"
 rustfft = "6.3.0"
 tui-bar-graph = "0.1.1"
-tui-big-text = "0.7.1"
+tui-big-text = "=0.7.0"
+
+[build-dependencies]
+embuild = "0.33"
