@@ -17,20 +17,22 @@ use esp_idf_svc::hal::{
     spi::{SpiConfig, SpiDeviceDriver, SpiDriverConfig},
     units::*,
 };
+use mipidsi::options::{ColorInversion, Orientation, Rotation};
 use mipidsi::{interface::SpiInterface, models::ST7789, Builder};
-
-use mipidsi::options::ColorInversion;
 
 use std::sync::mpsc;
 use transform::Transform;
 use ui::*;
 
 fn mock_data(tx: mpsc::Sender<Vec<i16>>) {
-    let builder = thread::Builder::new().name("mock_data_thread".into()).stack_size(10 * 1024); // 64KB stack
+    let builder = thread::Builder::new()
+        .name("mock_data_thread".into())
+        .stack_size(10 * 1024); // 64KB stack
 
     builder
         .spawn(move || {
-            let mut samples = vec![0i16; 10]; // smaller buffer
+            let mut samples = vec![0i16; 200];
+
             let mut i = 0;
 
             loop {
@@ -43,7 +45,7 @@ fn mock_data(tx: mpsc::Sender<Vec<i16>>) {
                     break;
                 }
 
-                thread::sleep(std::time::Duration::from_millis(10));
+                thread::sleep(std::time::Duration::from_millis(100));
             }
         })
         .expect("Failed to spawn mock data thread with custom stack size");
@@ -137,6 +139,5 @@ fn main() -> Result<(), Box<dyn Error>> {
         if let Ok(v) = rx.try_recv() {
             samples = v;
         }
-
     }
 }

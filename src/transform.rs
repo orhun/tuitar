@@ -1,6 +1,6 @@
 use pitchy::Note;
-use rustfft::FftPlanner;
 use rustfft::num_complex::Complex;
+use rustfft::FftPlanner;
 
 pub struct Transform {
     fft_samples: Vec<Complex<f64>>,
