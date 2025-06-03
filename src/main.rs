@@ -6,7 +6,7 @@ use std::error::Error;
 use std::thread;
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
-use mousefood::{prelude::*};
+use mousefood::prelude::*;
 
 use embedded_hal::spi::MODE_3;
 
@@ -98,6 +98,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .reset_pin(PinDriver::output(peripherals.pins.gpio23)?)
         .display_offset(DISPLAY_OFFSET.0, DISPLAY_OFFSET.1)
         .display_size(DISPLAY_SIZE.0, DISPLAY_SIZE.1)
+        .orientation(Orientation::new().rotate(Rotation::Deg90))
         .init(&mut delay)
         .expect("Failed to init display");
 
