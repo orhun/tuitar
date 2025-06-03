@@ -1,6 +1,6 @@
 [build]
 target = "xtensa-esp32-espidf"
-target-dir = "/drv/cargo/esp_target"
+target-dir="/home/orhun/gh/esp32-playground/spi_display_example/target"
 
 [target.xtensa-esp32-espidf]
 linker = "ldproxy"
