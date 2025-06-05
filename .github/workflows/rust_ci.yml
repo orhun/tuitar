@@ -30,6 +30,13 @@ jobs:
           - command: clippy
             args: -- -D warnings
     steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            --no-install-recommends \
+            --allow-unauthenticated \
+            libasound2-dev
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Setup Rust
