@@ -1,5 +1,4 @@
 [build]
-target = "xtensa-esp32-espidf"
 target-dir="/home/orhun/gh/esp32-playground/spi_display_example/target"
 
 [target.xtensa-esp32-espidf]
