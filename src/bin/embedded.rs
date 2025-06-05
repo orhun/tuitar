@@ -1,7 +1,3 @@
-mod input;
-mod transform;
-mod ui;
-
 use std::error::Error;
 use std::thread;
 
@@ -21,8 +17,8 @@ use mipidsi::options::{ColorInversion, Orientation, Rotation};
 use mipidsi::{interface::SpiInterface, models::ST7789, Builder};
 
 use std::sync::mpsc;
-use transform::Transform;
-use ui::*;
+use tuitar::transform::Transform;
+use tuitar::ui::*;
 
 fn mock_data(tx: mpsc::Sender<Vec<i16>>) {
     let builder = thread::Builder::new()
@@ -113,7 +109,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let sample_rate = 384000.;
     let mut samples = Vec::new();
-    let mut mode = 0;
+    let mode = 0;
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
