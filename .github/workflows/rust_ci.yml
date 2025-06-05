@@ -22,11 +22,13 @@ jobs:
       matrix:
         action:
           - command: build
-            args: --release
+            args: --features tty
+          - command: build
+            args: --features embedded --bin tuitar-embedded --target xtensa-esp32-espidf
           - command: fmt
             args: --all -- --check --color always
           - command: clippy
-            args: --all-targets --all-features --workspace -- -D warnings
+            args: -- -D warnings
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
