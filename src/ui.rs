@@ -12,7 +12,7 @@ use tui_big_text::{BigText, PixelSize};
 
 use crate::transform::Transform;
 
-pub fn draw_waveform(frame: &mut Frame<'_>, samples: &Vec<i16>) {
+pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16]) {
     let data_points: Vec<(f64, f64)> = samples
         .iter()
         .enumerate()
