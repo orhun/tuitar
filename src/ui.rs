@@ -113,21 +113,18 @@ pub fn draw_frequency_chart(frame: &mut Frame<'_>, transform: &Transform, sample
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_note(frame: &mut Frame<'_>, note: &Note) {
+pub fn draw_note(frame: &mut Frame<'_>, note: &Note, pixel_size: PixelSize) {
     if let Some(name) = note.name() {
         let big_text = BigText::builder()
-            .pixel_size(PixelSize::Full)
+            .pixel_size(pixel_size)
             .style(Style::new().blue())
             .lines(vec![name.into()])
             .build();
 
-        let [area] = Layout::horizontal([Constraint::Percentage(20)])
-            .flex(Flex::Center)
-            .areas(frame.area());
-        let [area] = Layout::vertical([Constraint::Percentage(20)])
-            .flex(Flex::Center)
-            .areas(area);
-
-        frame.render_widget(big_text, area);
+        let center_area = frame.area().offset(Offset {
+            x: (frame.area().width / 2) as i32,
+            y: (((frame.area().height / 2) - (big_text.lines.len() as u16)) as i32) + 1,
+        });
+        frame.render_widget(big_text, center_area);
     }
 }

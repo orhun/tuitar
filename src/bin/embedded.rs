@@ -1,50 +1,79 @@
-use std::error::Error;
-use std::thread;
+use std::thread::{self, ScopedJoinHandle};
+use std::time::Instant;
+use std::{error::Error, thread::Scope};
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
+use esp_idf_svc::hal::gpio::ADCPin;
 use mousefood::prelude::*;
 
 use embedded_hal::spi::MODE_3;
 
 use esp_idf_svc::hal::{
+    adc::{
+        attenuation::DB_11,
+        oneshot::{
+            config::{AdcChannelConfig, Calibration},
+            AdcChannelDriver, AdcDriver,
+        },
+        Resolution,
+    },
     delay::Ets,
     gpio::{AnyIOPin, PinDriver},
+    peripheral::Peripheral,
     peripherals::Peripherals,
     spi::{SpiConfig, SpiDeviceDriver, SpiDriverConfig},
     units::*,
 };
 use mipidsi::options::{ColorInversion, Orientation, Rotation};
 use mipidsi::{interface::SpiInterface, models::ST7789, Builder};
+use pitchy::Note;
+use tui_big_text::PixelSize;
 
 use std::sync::mpsc;
 use tuitar::transform::Transform;
 use tuitar::ui::*;
 
-fn mock_data(tx: mpsc::Sender<Vec<i16>>) {
-    let builder = thread::Builder::new()
-        .name("mock_data_thread".into())
-        .stack_size(10 * 1024); // 64KB stack
+pub fn spawn_reader_thread<'scope, T>(
+    scope: &'scope Scope<'scope, '_>,
+    adc: impl Peripheral<P = T::Adc> + 'scope + Send,
+    battery_pin: impl Peripheral<P = T> + 'scope + Send,
+    sender: mpsc::Sender<Vec<i16>>,
+    sample_rate: f64,
+) -> Result<ScopedJoinHandle<'scope, ()>, std::io::Error>
+where
+    T: ADCPin,
+{
+    thread::Builder::new()
+        .stack_size(8192)
+        .spawn_scoped(scope, move || {
+            let adc_driver = AdcDriver::new(adc).unwrap();
+            let mut adc_channel = AdcChannelDriver::new(
+                &adc_driver,
+                battery_pin,
+                &AdcChannelConfig {
+                    attenuation: DB_11,
+                    calibration: Calibration::Line,
+                    resolution: Resolution::Resolution12Bit,
+                },
+            )
+            .unwrap();
 
-    builder
-        .spawn(move || {
-            let mut samples = vec![0i16; 200];
-
-            let mut i = 0;
+            let interval = std::time::Duration::from_secs_f64(1.0 / sample_rate);
 
             loop {
-                for sample in &mut samples {
-                    *sample = (i % 32768) as i16;
-                    i += 1;
+                let mut samples = Vec::with_capacity(sample_rate as usize);
+
+                for _ in 0..(sample_rate as usize) {
+                    let raw = adc_channel.read().unwrap_or(0) as i32;
+                    samples.push(raw as i16);
+                    thread::sleep(interval);
                 }
 
-                if tx.send(samples.clone()).is_err() {
+                if sender.send(samples).is_err() {
                     break;
                 }
-
-                thread::sleep(std::time::Duration::from_millis(100));
             }
         })
-        .expect("Failed to spawn mock data thread with custom stack size");
 }
 
 const DISPLAY_OFFSET: (u16, u16) = (52, 40);
@@ -103,38 +132,85 @@ fn main() -> Result<(), Box<dyn Error>> {
         .clear(Rgb565::BLACK)
         .expect("Failed to clear display");
 
-    let (tx, rx) = mpsc::channel::<Vec<i16>>();
+    let adc_driver = AdcDriver::new(peripherals.adc1).unwrap();
+    let mut mic_adc_channel = AdcChannelDriver::new(
+        &adc_driver,
+        peripherals.pins.gpio36,
+        &AdcChannelConfig {
+            attenuation: DB_11,
+            calibration: Calibration::None,
+            // Sample unsigned 12-bit integers (0-4095)
+            resolution: Resolution::Resolution12Bit,
+        },
+    )
+    .unwrap();
 
-    mock_data(tx);
+    // let (tx, rx) = mpsc::channel::<Vec<i16>>();
+    // read_mic_input(tx, &peripherals);
+    // if let Ok(v) = rx.try_recv() {
+    //     samples = v;
+    // }
+    //
+    //
 
-    let sample_rate = 384000.;
-    let mut samples = Vec::new();
+    let samples_needed = 512;
+    let mut samples = Vec::with_capacity(samples_needed);
     let mode = 0;
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
+
+    let mut transform = Transform::new();
+
     loop {
+        let instant = Instant::now();
+        while samples.len() < samples_needed {
+            let raw = mic_adc_channel.read().unwrap_or(0);
+            samples.push(raw as i16);
+        }
+
+        let elapsed = instant.elapsed();
+
+        transform.process(&samples);
+
+        let sample_rate = samples.len() as f64 / elapsed.as_secs_f64();
+        let freq_nyquist = sample_rate / 2.0;
+
+        let magnitudes = transform.normalized_fft_data();
+
+        let (max_index, _) = magnitudes
+            .iter()
+            .enumerate()
+            .skip(1) // skip DC bin
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .unwrap();
+
+        let bin_width = freq_nyquist / magnitudes.len() as f64;
+        let fundamental_freq = max_index as f64 * bin_width;
+
+        println!(
+            "Sampled {} samples at {:.2} Hz | Nyquist: {:.2} Hz | Bin width: {:.2} Hz | Fundamental frequency = {:.2} Hz",
+            samples.len(),
+            sample_rate,
+            freq_nyquist,
+          bin_width,
+            fundamental_freq
+        );
+        let note = Note::new(fundamental_freq);
+
         terminal
             .draw(|frame| {
-                let transform = Transform::new(samples.clone());
                 match mode {
-                    0 => {
-                        draw_waveform(frame, &samples);
-                    }
-                    1 => {
-                        draw_frequency(frame, &transform);
-                    }
-                    2 => {
-                        draw_frequency_chart(frame, &transform, sample_rate);
-                    }
+                    0 => draw_waveform(frame, &samples, sample_rate, (0., 2048.0)),
+                    1 => draw_frequency(frame, &transform),
+                    2 => draw_frequency_chart(frame, &transform, samples_needed as f64),
                     _ => {}
                 }
-                draw_note(frame, &transform.note(sample_rate as u32));
+
+                draw_note(frame, &note, PixelSize::Quadrant);
             })
             .unwrap();
 
-        if let Ok(v) = rx.try_recv() {
-            samples = v;
-        }
+        samples.clear();
     }
 }

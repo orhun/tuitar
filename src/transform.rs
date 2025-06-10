@@ -2,25 +2,27 @@ use pitchy::Note;
 use rustfft::num_complex::Complex;
 use rustfft::FftPlanner;
 
+// TODO: Use <https://docs.rs/microfft> instead
 pub struct Transform {
+    fft_planner: FftPlanner<f64>,
     fft_samples: Vec<Complex<f64>>,
 }
 
 impl Transform {
-    pub fn new(samples: Vec<i16>) -> Self {
+    pub fn new() -> Self {
+        Transform {
+            fft_planner: FftPlanner::new(),
+            fft_samples: Vec::new(),
+        }
+    }
+
+    pub fn process(&mut self, samples: &[i16]) {
         let samples_f64: Vec<f64> = samples.iter().map(|&s| s as f64).collect();
-
-        let mut planner = FftPlanner::new();
-        let fft = planner.plan_fft_forward(samples.len());
-
+        let fft = self.fft_planner.plan_fft_forward(samples.len());
         let mut fft_input: Vec<Complex<f64>> =
             samples_f64.iter().map(|&s| Complex::new(s, 0.0)).collect();
-
         fft.process(&mut fft_input);
-
-        Self {
-            fft_samples: fft_input,
-        }
+        self.fft_samples = fft_input;
     }
 
     fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
@@ -54,5 +56,13 @@ impl Transform {
             .collect();
 
         magnitude_spectrum
+    }
+
+    /// Returns the FFT data normalized by the square root of the number of samples.
+    ///
+    /// See <https://docs.rs/rustfft/latest/rustfft/#normalization>
+    pub fn normalized_fft_data(&self) -> Vec<f64> {
+        let len = self.fft_samples.len() as f64;
+        self.fft_data().iter().map(|&m| m / len.sqrt()).collect()
     }
 }
