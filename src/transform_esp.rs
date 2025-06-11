@@ -8,11 +8,17 @@ pub struct Transform {
     fft_samples: [Complex32; FFT_SIZE / 2],
 }
 
-impl Transform {
-    pub fn new() -> Self {
+impl Default for Transform {
+    fn default() -> Self {
         Self {
             fft_samples: [Complex32::new(0.0, 0.0); FFT_SIZE / 2],
         }
+    }
+}
+
+impl Transform {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn process(&mut self, samples: &[i16]) {

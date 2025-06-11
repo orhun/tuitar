@@ -22,7 +22,7 @@ pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, b
         .iter()
         .enumerate()
         .map(|(i, &sample)| {
-            let time_in_seconds = (i as f64) / sample_rate as f64;
+            let time_in_seconds = (i as f64) / sample_rate;
             (time_in_seconds, sample as f64)
         })
         .collect();
