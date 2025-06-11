@@ -46,6 +46,7 @@ fn main() {
                     frame,
                     &transform.note(recorder.sample_rate()),
                     PixelSize::Full,
+                    5,
                 );
             })
             .unwrap();

@@ -150,7 +150,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     _ => {}
                 }
 
-                draw_note(frame, &note, PixelSize::Quadrant);
+                draw_note(frame, &note, PixelSize::Quadrant, 2);
             })
             .unwrap();
 

@@ -1,5 +1,6 @@
 use pitchy::Note;
-use ratatui::layout::Offset;
+use ratatui::layout::{Alignment, Offset};
+use ratatui::style::Color;
 use ratatui::widgets::Block;
 use ratatui::Frame;
 use ratatui::{
@@ -141,18 +142,18 @@ pub fn draw_frequency_chart(frame: &mut Frame<'_>, transform: &Transform, sample
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_note(frame: &mut Frame<'_>, note: &Note, pixel_size: PixelSize) {
+pub fn draw_note(frame: &mut Frame<'_>, note: &Note, pixel_size: PixelSize, y_offset: u16) {
     if let Some(name) = note.name() {
         let big_text = BigText::builder()
             .pixel_size(pixel_size)
-            .style(Style::new().blue())
+            .style(Color::Blue)
             .lines(vec![name.into()])
+            .alignment(Alignment::Center)
             .build();
-
-        let center_area = frame.area().offset(Offset {
-            x: (frame.area().width / 2) as i32,
-            y: (((frame.area().height / 2) - (big_text.lines.len() as u16)) as i32) + 1,
+        let area = frame.area().offset(Offset {
+            x: 0,
+            y: (frame.area().height / 2).saturating_sub(y_offset) as i32,
         });
-        frame.render_widget(big_text, center_area);
+        frame.render_widget(big_text, area);
     }
 }
