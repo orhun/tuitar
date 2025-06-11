@@ -5,10 +5,10 @@ authors = ["Orhun Parmaksız <orhunparmaksiz@gmail.com>"]
 edition = "2021"
 resolver = "2"
 rust-version = "1.77"
-default-run = "tuitar-tty"
+default-run = "tuitar-embedded"
 
 [profile.release]
-opt-level = "s"
+opt-level = 3
 
 [profile.dev]
 debug = true    # Symbols are nice and they don't increase the size on Flash
@@ -25,14 +25,13 @@ path = "src/bin/tty.rs"
 required-features = ["tty"]
 
 [features]
-default = []
+default = ["embedded"]
 tty = ["ratatui/crossterm", "cpal"]
 embedded = ["embuild"]
 experimental = ["esp-idf-svc/experimental"]
 
 [dependencies]
 colorgrad = "0.7.1"
-log = "0.4"
 pitchy = "0.1.1"
 ratatui = { version = "0.29.0", default-features = false }
 rustfft = "6.3.0"
@@ -48,6 +47,9 @@ embedded-graphics = "0.8.1"
 mipidsi = "0.9.0"
 embedded-hal = "1.0.0"
 mousefood = "0.2.1"
+log = "0.4"
+microfft = "0.6.0"
+num-complex = "0.4.6"
 
 [build-dependencies]
 embuild = { version = "0.33", optional = true }
