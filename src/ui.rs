@@ -62,12 +62,36 @@ pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, b
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform) {
+pub fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform, sample_rate: f64) {
     let data_points = transform.fft_data();
-    let bar_graph = BarGraph::new(data_points)
-        .with_gradient(colorgrad::preset::cool())
+
+    let fft_size = data_points.len();
+    let freq_per_bin = sample_rate as f32 / fft_size as f32;
+
+    // Calculate bin indices for 20Hz and 20kHz
+    let start_bin = (20.0 / freq_per_bin).ceil() as usize;
+    let end_bin = ((20_000.0 / freq_per_bin).floor() as usize).min(fft_size);
+
+    // Slice out the desired frequency range, skip the first spike
+    let filtered_points = &data_points[start_bin..end_bin];
+
+    // Normalize data to 0..1 range for colorgrad
+    let max_value = filtered_points
+        .iter()
+        .cloned()
+        .fold(0.0_f64, f64::max)
+        .max(1e-8); // Avoid division by zero
+
+    let scaled_points: Vec<f64> = filtered_points
+        .iter()
+        .map(|&x| ((x / max_value).clamp(0.0, 1.0)))
+        .collect();
+
+    let bar_graph = BarGraph::new(scaled_points)
+        .with_gradient(colorgrad::preset::rainbow())
         .with_bar_style(BarStyle::Braille)
         .with_color_mode(ColorMode::VerticalGradient);
+
     frame.render_widget(bar_graph, frame.area());
 }
 
