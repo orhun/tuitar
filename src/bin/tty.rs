@@ -1,5 +1,6 @@
 use std::sync::mpsc;
 
+use pitchy::Note;
 use ratatui::crossterm::event::{self, Event, KeyCode};
 use tui_big_text::PixelSize;
 use tuitar::input::Recorder;
@@ -17,14 +18,16 @@ fn main() {
 
     let mut terminal = ratatui::init();
     let mut samples = Vec::new();
-    let mut mode = 0;
+    let mut mode = 1;
 
     let mut transform = Transform::new();
 
     loop {
+        transform.process(&samples);
+        let fundamental_freq = transform.find_fundamental_frequency(recorder.sample_rate() as f64);
+        let note = Note::new(fundamental_freq);
         terminal
             .draw(|frame| {
-                transform.process(&samples);
                 match mode {
                     0 => {
                         draw_waveform(
@@ -42,12 +45,7 @@ fn main() {
                     }
                     _ => {}
                 }
-                draw_note(
-                    frame,
-                    &transform.note(recorder.sample_rate()),
-                    PixelSize::Full,
-                    5,
-                );
+                draw_note(frame, &note, PixelSize::Full, 5);
             })
             .unwrap();
         if let Ok(v) = rx.try_recv() {

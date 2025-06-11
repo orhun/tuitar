@@ -1,6 +1,5 @@
 use microfft::real::rfft_512;
 use num_complex::Complex32;
-use pitchy::Note;
 
 const FFT_SIZE: usize = 512;
 
@@ -57,11 +56,6 @@ impl Transform {
 
         let bin_width = freq_nyquist / magnitudes.len() as f32;
         max_index as f32 * bin_width
-    }
-
-    pub fn note(&self, sample_rate: u32) -> Note {
-        let fundamental_freq = self.find_fundamental_frequency(sample_rate as f32);
-        Note::new(fundamental_freq as f64)
     }
 
     pub fn fft_data(&self) -> Vec<f64> {

@@ -24,7 +24,7 @@ impl Transform {
         self.fft_samples = fft_input;
     }
 
-    fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
+    pub fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
         let mut max_magnitude = 0.0;
         let mut fundamental_freq = 0.0;
 

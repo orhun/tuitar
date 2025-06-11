@@ -1,7 +1,10 @@
+use std::str::FromStr;
+
 use pitchy::Note;
-use ratatui::layout::{Alignment, Offset};
+use ratatui::layout::{Alignment, Margin, Offset};
 use ratatui::style::Color;
-use ratatui::widgets::Block;
+use ratatui::text::{Line, Span};
+use ratatui::widgets::{Block, LineGauge};
 use ratatui::Frame;
 use ratatui::{
     style::{Style, Stylize},
@@ -144,16 +147,93 @@ pub fn draw_frequency_chart(frame: &mut Frame<'_>, transform: &Transform, sample
 
 pub fn draw_note(frame: &mut Frame<'_>, note: &Note, pixel_size: PixelSize, y_offset: u16) {
     if let Some(name) = note.name() {
+        let target = Note::from_str(&name).expect("failed to get perfect note");
+        // 1 semitone = 100 cents
+        // 1200 cents = 1 octave
+        // cents = 1200 * log2(note.frequency() / target.frequency())
+        let cents = 1200.0 * (note.frequency() / target.frequency()).log2();
+
+        // One character represents 10 cents, max 5 characters
+        let n = (cents.abs() / 10.0).round() as usize;
+        let n = n.min(5);
+
+        let mut spans = Vec::new();
+        if cents.abs() < 1.0 {
+            spans.push(name.green());
+        } else if cents > 0.0 {
+            spans.push(Span::raw(" ".repeat(n)));
+            spans.push(name.blue());
+            spans.push(Span::styled(".".repeat(n), Color::Green));
+        } else {
+            spans.push(Span::styled(".".repeat(n), Color::Red));
+            spans.push(name.blue());
+            spans.push(Span::raw(" ".repeat(n)));
+        };
+
+        let text = vec![Line::from(spans)];
+
+        let cents = cents.clamp(-50.0, 50.0);
+        let ratio = ((cents + 50.0) / 100.0).clamp(0.0, 1.0);
+
+        let label = if cents.abs() < 1.0 {
+            "✓ in tune".to_string()
+        } else if cents > 0.0 {
+            format!("+{:.1}c", cents)
+        } else {
+            format!("{:.1}c", cents)
+        };
+
+        let (filled_style, unfilled_style) = if cents < 0.0 {
+            (
+                Style::new().white().on_red().bold(),
+                Style::new().gray().on_black(),
+            )
+        } else {
+            (
+                Style::new().white().on_green().bold(),
+                Style::new().gray().on_black(),
+            )
+        };
+
+        let gauge = LineGauge::default()
+            .filled_style(filled_style)
+            .unfilled_style(unfilled_style)
+            .label(Line::from(label).italic())
+            .ratio(ratio);
+
+        frame.render_widget(
+            gauge,
+            frame.area().inner(Margin {
+                horizontal: frame.area().width / 5,
+                vertical: 0,
+            }),
+        );
+
         let big_text = BigText::builder()
             .pixel_size(pixel_size)
             .style(Color::Blue)
-            .lines(vec![name.into()])
+            .lines(text)
             .alignment(Alignment::Center)
             .build();
+
         let area = frame.area().offset(Offset {
             x: 0,
             y: (frame.area().height / 2).saturating_sub(y_offset) as i32,
         });
         frame.render_widget(big_text, area);
+
+        let freq_text = format!("{:.2} Hz", note.frequency());
+        let freq_line =
+            Line::styled(&freq_text, Style::new().bold().white()).alignment(Alignment::Center);
+        let text_area = area
+            .offset(Offset {
+                x: 0,
+                y: y_offset as i32 + 2,
+            })
+            .inner(Margin {
+                horizontal: area.width.saturating_sub(freq_text.len() as u16) / 2,
+                vertical: 0,
+            });
+        frame.render_widget(freq_line, text_area);
     }
 }
