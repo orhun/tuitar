@@ -96,8 +96,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     )
     .unwrap();
 
-    let samples_needed = 512;
-    let mut samples = Vec::with_capacity(samples_needed);
+    let buffer_size = 512;
+    let mut samples = Vec::with_capacity(buffer_size);
     let mode = 1;
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
@@ -107,7 +107,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         let instant = Instant::now();
-        while samples.len() < samples_needed {
+        while samples.len() < buffer_size {
             let raw = mic_adc_channel.read().unwrap_or(0);
             samples.push(raw as i16);
         }
@@ -117,36 +117,23 @@ fn main() -> Result<(), Box<dyn Error>> {
         transform.process(&samples);
 
         let sample_rate = samples.len() as f64 / elapsed.as_secs_f64();
-        let freq_nyquist = sample_rate / 2.0;
 
-        let magnitudes = transform.normalized_fft_data();
-
-        let (max_index, _) = magnitudes
-            .iter()
-            .enumerate()
-            .skip(1) // skip DC bin
-            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-            .unwrap();
-
-        let bin_width = freq_nyquist / magnitudes.len() as f64;
-        let fundamental_freq = max_index as f64 * bin_width;
+        let fundamental_freq = transform.find_fundamental_frequency(sample_rate as f32);
+        let note = Note::new(fundamental_freq as f64);
 
         log::info!(
-            "Sampled {} samples at {:.2} Hz | Nyquist: {:.2} Hz | Bin width: {:.2} Hz | Fundamental frequency = {:.2} Hz",
+            "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
             samples.len(),
             sample_rate,
-            freq_nyquist,
-          bin_width,
             fundamental_freq
         );
-        let note = Note::new(fundamental_freq);
 
         terminal
             .draw(|frame| {
                 match mode {
                     0 => draw_waveform(frame, &samples, sample_rate, (512., 1536.)),
                     1 => draw_frequency(frame, &transform, sample_rate),
-                    2 => draw_frequency_chart(frame, &transform, samples_needed as f64),
+                    2 => draw_frequency_chart(frame, &transform, buffer_size as f64),
                     _ => {}
                 }
 

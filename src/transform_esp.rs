@@ -43,19 +43,20 @@ impl Transform {
         self.fft_samples[0].im = 0.0;
     }
 
-    fn find_fundamental_frequency(&self, sample_rate: f32) -> f32 {
-        let mut max_magnitude = 0.0;
-        let mut fundamental_freq = 0.0;
+    pub fn find_fundamental_frequency(&self, sample_rate: f32) -> f32 {
+        let freq_nyquist = sample_rate / 2.0;
 
-        for (i, sample) in self.fft_samples.iter().enumerate() {
-            let magnitude = sample.norm();
-            if magnitude > max_magnitude {
-                max_magnitude = magnitude;
-                fundamental_freq = i as f32 * sample_rate / FFT_SIZE as f32;
-            }
-        }
+        let magnitudes = self.normalized_fft_data();
 
-        fundamental_freq
+        let (max_index, _) = magnitudes
+            .iter()
+            .enumerate()
+            .skip(1) // skip DC bin
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .unwrap();
+
+        let bin_width = freq_nyquist / magnitudes.len() as f32;
+        max_index as f32 * bin_width
     }
 
     pub fn note(&self, sample_rate: u32) -> Note {
