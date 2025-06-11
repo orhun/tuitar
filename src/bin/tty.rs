@@ -35,7 +35,7 @@ fn main() {
                         );
                     }
                     1 => {
-                        draw_frequency(frame, &transform);
+                        draw_frequency(frame, &transform, recorder.sample_rate() as f64);
                     }
                     2 => {
                         draw_frequency_chart(frame, &transform, recorder.sample_rate() as f64);

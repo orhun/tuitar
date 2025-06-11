@@ -2,7 +2,6 @@ use pitchy::Note;
 use rustfft::num_complex::Complex;
 use rustfft::FftPlanner;
 
-// TODO: Use <https://docs.rs/microfft> instead
 pub struct Transform {
     fft_planner: FftPlanner<f64>,
     fft_samples: Vec<Complex<f64>>,

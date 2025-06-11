@@ -1,9 +1,7 @@
-use std::thread::{self, ScopedJoinHandle};
+use std::error::Error;
 use std::time::Instant;
-use std::{error::Error, thread::Scope};
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
-use esp_idf_svc::hal::gpio::ADCPin;
 use mousefood::prelude::*;
 
 use embedded_hal::spi::MODE_3;
@@ -19,7 +17,6 @@ use esp_idf_svc::hal::{
     },
     delay::Ets,
     gpio::{AnyIOPin, PinDriver},
-    peripheral::Peripheral,
     peripherals::Peripherals,
     spi::{SpiConfig, SpiDeviceDriver, SpiDriverConfig},
     units::*,
@@ -29,52 +26,8 @@ use mipidsi::{interface::SpiInterface, models::ST7789, Builder};
 use pitchy::Note;
 use tui_big_text::PixelSize;
 
-use std::sync::mpsc;
-use tuitar::transform::Transform;
+use tuitar::transform_esp::Transform;
 use tuitar::ui::*;
-
-pub fn spawn_reader_thread<'scope, T>(
-    scope: &'scope Scope<'scope, '_>,
-    adc: impl Peripheral<P = T::Adc> + 'scope + Send,
-    battery_pin: impl Peripheral<P = T> + 'scope + Send,
-    sender: mpsc::Sender<Vec<i16>>,
-    sample_rate: f64,
-) -> Result<ScopedJoinHandle<'scope, ()>, std::io::Error>
-where
-    T: ADCPin,
-{
-    thread::Builder::new()
-        .stack_size(8192)
-        .spawn_scoped(scope, move || {
-            let adc_driver = AdcDriver::new(adc).unwrap();
-            let mut adc_channel = AdcChannelDriver::new(
-                &adc_driver,
-                battery_pin,
-                &AdcChannelConfig {
-                    attenuation: DB_11,
-                    calibration: Calibration::Line,
-                    resolution: Resolution::Resolution12Bit,
-                },
-            )
-            .unwrap();
-
-            let interval = std::time::Duration::from_secs_f64(1.0 / sample_rate);
-
-            loop {
-                let mut samples = Vec::with_capacity(sample_rate as usize);
-
-                for _ in 0..(sample_rate as usize) {
-                    let raw = adc_channel.read().unwrap_or(0) as i32;
-                    samples.push(raw as i16);
-                    thread::sleep(interval);
-                }
-
-                if sender.send(samples).is_err() {
-                    break;
-                }
-            }
-        })
-}
 
 const DISPLAY_OFFSET: (u16, u16) = (52, 40);
 const DISPLAY_SIZE: (u16, u16) = (135, 240);
@@ -86,8 +39,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Bind the log crate to the ESP Logging facilities
     esp_idf_svc::log::EspLogger::initialize_default();
-
-    log::info!("Hello, world!");
 
     let peripherals = Peripherals::take()?;
 
@@ -145,17 +96,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     )
     .unwrap();
 
-    // let (tx, rx) = mpsc::channel::<Vec<i16>>();
-    // read_mic_input(tx, &peripherals);
-    // if let Ok(v) = rx.try_recv() {
-    //     samples = v;
-    // }
-    //
-    //
-
     let samples_needed = 512;
     let mut samples = Vec::with_capacity(samples_needed);
-    let mode = 0;
+    let mode = 1;
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
@@ -188,7 +131,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let bin_width = freq_nyquist / magnitudes.len() as f64;
         let fundamental_freq = max_index as f64 * bin_width;
 
-        println!(
+        log::info!(
             "Sampled {} samples at {:.2} Hz | Nyquist: {:.2} Hz | Bin width: {:.2} Hz | Fundamental frequency = {:.2} Hz",
             samples.len(),
             sample_rate,
@@ -201,8 +144,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         terminal
             .draw(|frame| {
                 match mode {
-                    0 => draw_waveform(frame, &samples, sample_rate, (0., 2048.0)),
-                    1 => draw_frequency(frame, &transform),
+                    0 => draw_waveform(frame, &samples, sample_rate, (512., 1536.)),
+                    1 => draw_frequency(frame, &transform, sample_rate),
                     2 => draw_frequency_chart(frame, &transform, samples_needed as f64),
                     _ => {}
                 }

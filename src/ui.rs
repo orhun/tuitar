@@ -10,7 +10,11 @@ use ratatui::{
 use tui_bar_graph::{BarGraph, BarStyle, ColorMode};
 use tui_big_text::{BigText, PixelSize};
 
+#[cfg(feature = "tty")]
 use crate::transform::Transform;
+
+#[cfg(feature = "embedded")]
+use crate::transform_esp::Transform;
 
 pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, bounds: (f64, f64)) {
     let duration = samples.len() as f64 / sample_rate;
