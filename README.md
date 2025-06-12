@@ -2,10 +2,10 @@
 
 Learning how to play guitar with a TUI - hence _Tuitar_.
 
-> ![NOTE]
+> [!NOTE]
 > Building all of this [on livestream](https://www.youtube.com/@orhundev/streams).
 
-> ![WARN]
+> [!WARN]
 > This is a work in progress.
 
 ## Demo
