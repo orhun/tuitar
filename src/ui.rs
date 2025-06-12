@@ -159,7 +159,9 @@ pub fn draw_note(frame: &mut Frame<'_>, note: &Note, pixel_size: PixelSize, y_of
 
         let mut spans = Vec::new();
         if cents.abs() < 1.0 {
+            spans.push(Span::raw("["));
             spans.push(name.green());
+            spans.push(Span::raw("]"));
         } else if cents > 0.0 {
             spans.push(Span::raw(" ".repeat(n)));
             spans.push(name.blue());
