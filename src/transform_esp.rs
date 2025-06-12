@@ -50,12 +50,27 @@ impl Transform {
         let (max_index, _) = magnitudes
             .iter()
             .enumerate()
-            .skip(1) // skip DC bin
+            .skip(1)
+            .take(magnitudes.len() - 2) // Ensure we don't hit the end bins
             .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
             .unwrap();
 
         let bin_width = freq_nyquist / magnitudes.len() as f32;
-        max_index as f32 * bin_width
+
+        // Clamp indices to valid range
+        if max_index == 0 || max_index + 1 >= magnitudes.len() {
+            return max_index as f32 * bin_width;
+        }
+
+        // Use log-magnitudes for interpolation
+        let y0 = magnitudes[max_index - 1].max(1e-12).ln();
+        let y1 = magnitudes[max_index].max(1e-12).ln();
+        let y2 = magnitudes[max_index + 1].max(1e-12).ln();
+
+        let delta = 0.5 * (y0 - y2) / (y0 - 2.0 * y1 + y2);
+        let bin = max_index as f32 + delta as f32;
+        let freq = bin * bin_width;
+        freq
     }
 
     pub fn fft_data(&self) -> Vec<f64> {
