@@ -1,7 +1,7 @@
-use microfft::real::rfft_512;
+use microfft::real;
 use num_complex::Complex32;
 
-const FFT_SIZE: usize = 512;
+const FFT_SIZE: usize = 1024;
 
 pub struct Transform {
     fft_samples: [Complex32; FFT_SIZE / 2],
@@ -36,7 +36,7 @@ impl Transform {
         }
 
         // Compute FFT in-place
-        let spectrum = rfft_512(&mut buffer);
+        let spectrum = real::rfft_1024(&mut buffer);
         self.fft_samples.copy_from_slice(spectrum);
         // microfft packs Nyquist freq in spectrum[0].im, so clear for amplitude
         self.fft_samples[0].im = 0.0;

@@ -89,14 +89,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         peripherals.pins.gpio36,
         &AdcChannelConfig {
             attenuation: DB_11,
-            calibration: Calibration::None,
+            calibration: Calibration::Line,
             // Sample unsigned 12-bit integers (0-4095)
             resolution: Resolution::Resolution12Bit,
         },
     )
     .unwrap();
 
-    let buffer_size = 512;
+    let buffer_size = 1024;
     let mut samples = Vec::with_capacity(buffer_size);
     let mode = 1;
 
