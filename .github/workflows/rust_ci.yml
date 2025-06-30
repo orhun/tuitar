@@ -22,15 +22,19 @@ jobs:
       matrix:
         action:
           - command: build
-            args: -p tuitar-tty --target x86_64-unknown-linux-gnu
+            target: x86_64-unknown-linux-gnu
+            working-dir: tuitar-tty
           - command: build
-            args: -p tuitar-embedded
+            target: xtensa-esp32-espidf
+            working-dir: tuitar-embedded
           - command: fmt
             args: --all -- --check --color always
-          - command: clippy
-            args: -p tuitar-tty -- -D warnings
-          - command: clippy
-            args: -p tuitar-embedded -- -D warnings
+          - command: clippy -- -D warnings
+            target: x86_64-unknown-linux-gnu
+            working-dir: tuitar-tty
+          - command: clippy -- -D warnings
+            target: xtensa-esp32-espidf
+            working-dir: tuitar-embedded
     steps:
       - name: Install dependencies
         run: |
@@ -50,4 +54,6 @@ jobs:
       - name: Enable caching
         uses: Swatinem/rust-cache@v2
       - name: Run command
-        run: cargo ${{ matrix.action.command }} ${{ matrix.action.args }}
+        run: |
+          cd ${{ matrix.action.working-dir || '.' }}
+          cargo ${{ matrix.action.command }} --target ${{ matrix.action.target || 'x86_64-unknown-linux-gnu' }}
