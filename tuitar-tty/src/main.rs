@@ -1,10 +1,13 @@
+mod input;
+mod transform;
+
 use std::sync::mpsc;
 
-use pitchy::Note;
+use input::Recorder;
 use ratatui::crossterm::event::{self, Event, KeyCode};
+use transform::Transform;
 use tui_big_text::PixelSize;
-use tuitar::input::Recorder;
-use tuitar::transform::Transform;
+use tuitar::transform::Transformer;
 use tuitar::ui::*;
 
 fn main() {
@@ -25,7 +28,6 @@ fn main() {
     loop {
         transform.process(&samples);
         let fundamental_freq = transform.find_fundamental_frequency(recorder.sample_rate() as f64);
-        let note = Note::new(fundamental_freq);
         terminal
             .draw(|frame| {
                 match mode {
@@ -45,7 +47,7 @@ fn main() {
                     }
                     _ => {}
                 }
-                draw_note(frame, &note, PixelSize::Full, 5);
+                draw_note(frame, fundamental_freq, PixelSize::Full, 5);
             })
             .unwrap();
         if let Ok(v) = rx.try_recv() {

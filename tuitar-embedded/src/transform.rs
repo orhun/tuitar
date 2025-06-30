@@ -1,5 +1,6 @@
 use microfft::real;
 use num_complex::Complex32;
+use tuitar::transform::Transformer;
 
 const FFT_SIZE: usize = 1024;
 
@@ -19,8 +20,10 @@ impl Transform {
     pub fn new() -> Self {
         Self::default()
     }
+}
 
-    pub fn process(&mut self, samples: &[i16]) {
+impl Transformer for Transform {
+    fn process(&mut self, samples: &[i16]) {
         assert_eq!(
             samples.len(),
             FFT_SIZE,
@@ -42,8 +45,8 @@ impl Transform {
         self.fft_samples[0].im = 0.0;
     }
 
-    pub fn find_fundamental_frequency(&self, sample_rate: f32) -> f32 {
-        let freq_nyquist = sample_rate / 2.0;
+    fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
+        let freq_nyquist = sample_rate as f32 / 2.0;
 
         let magnitudes = self.normalized_fft_data();
 
@@ -59,7 +62,7 @@ impl Transform {
 
         // Clamp indices to valid range
         if max_index == 0 || max_index + 1 >= magnitudes.len() {
-            return max_index as f32 * bin_width;
+            return (max_index as f32 * bin_width).into();
         }
 
         // Use log-magnitudes for interpolation
@@ -70,14 +73,14 @@ impl Transform {
         let delta = 0.5 * (y0 - y2) / (y0 - 2.0 * y1 + y2);
         let bin = max_index as f32 + delta as f32;
         let freq = bin * bin_width;
-        freq
+        freq.into()
     }
 
-    pub fn fft_data(&self) -> Vec<f64> {
+    fn fft_data(&self) -> Vec<f64> {
         self.fft_samples.iter().map(|c| c.norm() as f64).collect()
     }
 
-    pub fn normalized_fft_data(&self) -> Vec<f64> {
+    fn normalized_fft_data(&self) -> Vec<f64> {
         let len = FFT_SIZE as f32;
         self.fft_data()
             .iter()
