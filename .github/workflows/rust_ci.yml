@@ -27,8 +27,7 @@ jobs:
           - command: build
             target: xtensa-esp32-espidf
             working-dir: tuitar-embedded
-          - command: fmt
-            args: --all -- --check --color always
+          - command: fmt --all -- --check --color always
           - command: clippy -- -D warnings
             target: x86_64-unknown-linux-gnu
             working-dir: tuitar-tty
