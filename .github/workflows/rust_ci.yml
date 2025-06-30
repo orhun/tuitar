@@ -14,8 +14,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  rust-checks:
-    name: Rust Checks
+  checks:
+    name: Checks
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,7 +27,6 @@ jobs:
           - command: build
             target: xtensa-esp32-espidf
             working-dir: tuitar-embedded
-          - command: fmt --all -- --check --color always
           - command: clippy -- -D warnings
             target: x86_64-unknown-linux-gnu
             working-dir: tuitar-tty
@@ -56,3 +55,18 @@ jobs:
         run: |
           cd ${{ matrix.action.working-dir || '.' }}
           cargo ${{ matrix.action.command }} --target ${{ matrix.action.target || 'x86_64-unknown-linux-gnu' }}
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: esp-rs/xtensa-toolchain@v1.5
+        with:
+          default: true
+          buildtargets: esp32
+          ldproxy: true
+      - name: Run formatter
+        run: cargo fmt --all -- --check --color always
