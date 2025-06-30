@@ -1,0 +1,23 @@
+[package]
+name = "tuitar-embedded"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[features]
+experimental = ["esp-idf-svc/experimental"]
+
+[dependencies]
+tuitar.workspace = true
+tui-big-text.workspace = true
+esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+embedded-graphics = "0.8.1"
+mipidsi = "0.9.0"
+embedded-hal = "1.0.0"
+mousefood = "0.2.1"
+log = "0.4"
+microfft = "0.6.0"
+num-complex = "0.4.6"
+
+[build-dependencies]
+embuild = { version = "0.33", features = ["espidf"] }

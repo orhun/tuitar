@@ -1,3 +1,5 @@
+mod transform;
+
 use std::error::Error;
 use std::time::Instant;
 
@@ -23,10 +25,10 @@ use esp_idf_svc::hal::{
 };
 use mipidsi::options::{ColorInversion, Orientation, Rotation};
 use mipidsi::{interface::SpiInterface, models::ST7789, Builder};
-use pitchy::Note;
 use tui_big_text::PixelSize;
+use tuitar::transform::Transformer;
 
-use tuitar::transform_esp::Transform;
+use transform::Transform;
 use tuitar::ui::*;
 
 const DISPLAY_OFFSET: (u16, u16) = (52, 40);
@@ -118,8 +120,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let sample_rate = samples.len() as f64 / elapsed.as_secs_f64();
 
-        let fundamental_freq = transform.find_fundamental_frequency(sample_rate as f32);
-        let note = Note::new(fundamental_freq as f64);
+        let fundamental_freq = transform.find_fundamental_frequency(sample_rate);
 
         log::info!(
             "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
@@ -137,7 +138,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     _ => {}
                 }
 
-                draw_note(frame, &note, PixelSize::Quadrant, 2);
+                draw_note(frame, fundamental_freq, PixelSize::Quadrant, 2);
             })
             .unwrap();
 

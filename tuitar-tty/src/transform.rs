@@ -1,21 +1,29 @@
-use pitchy::Note;
 use rustfft::num_complex::Complex;
 use rustfft::FftPlanner;
+use tuitar::transform::Transformer;
 
 pub struct Transform {
     fft_planner: FftPlanner<f64>,
     fft_samples: Vec<Complex<f64>>,
 }
 
-impl Transform {
-    pub fn new() -> Self {
+impl Default for Transform {
+    fn default() -> Self {
         Transform {
             fft_planner: FftPlanner::new(),
             fft_samples: Vec::new(),
         }
     }
+}
 
-    pub fn process(&mut self, samples: &[i16]) {
+impl Transform {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Transformer for Transform {
+    fn process(&mut self, samples: &[i16]) {
         let samples_f64: Vec<f64> = samples.iter().map(|&s| s as f64).collect();
         let fft = self.fft_planner.plan_fft_forward(samples.len());
         let mut fft_input: Vec<Complex<f64>> =
@@ -24,7 +32,7 @@ impl Transform {
         self.fft_samples = fft_input;
     }
 
-    pub fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
+    fn find_fundamental_frequency(&self, sample_rate: f64) -> f64 {
         let mut max_magnitude = 0.0;
         let mut fundamental_freq = 0.0;
 
@@ -39,12 +47,7 @@ impl Transform {
         fundamental_freq
     }
 
-    pub fn note(&self, sample_rate: u32) -> Note {
-        let fundamental_freq = self.find_fundamental_frequency(sample_rate as f64);
-        Note::new(fundamental_freq)
-    }
-
-    pub fn fft_data(&self) -> Vec<f64> {
+    fn fft_data(&self) -> Vec<f64> {
         // Only take the first half of the FFT output (the positive frequencies)
         let half_len = self.fft_samples.len() / 2;
         let magnitude_spectrum: Vec<f64> = self
@@ -60,7 +63,7 @@ impl Transform {
     /// Returns the FFT data normalized by the square root of the number of samples.
     ///
     /// See <https://docs.rs/rustfft/latest/rustfft/#normalization>
-    pub fn normalized_fft_data(&self) -> Vec<f64> {
+    fn normalized_fft_data(&self) -> Vec<f64> {
         let len = self.fft_samples.len() as f64;
         self.fft_data().iter().map(|&m| m / len.sqrt()).collect()
     }

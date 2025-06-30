@@ -14,11 +14,7 @@ use ratatui::{
 use tui_bar_graph::{BarGraph, BarStyle, ColorMode};
 use tui_big_text::{BigText, PixelSize};
 
-#[cfg(feature = "tty")]
-use crate::transform::Transform;
-
-#[cfg(feature = "embedded")]
-use crate::transform_esp::Transform;
+use crate::transform::Transformer;
 
 pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, bounds: (f64, f64)) {
     let duration = samples.len() as f64 / sample_rate;
@@ -66,7 +62,7 @@ pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, b
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform, sample_rate: f64) {
+pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, transform: &T, sample_rate: f64) {
     let data_points = transform.fft_data();
 
     let fft_size = data_points.len();
@@ -100,7 +96,11 @@ pub fn draw_frequency(frame: &mut Frame<'_>, transform: &Transform, sample_rate:
 }
 
 // TODO: needs fixing
-pub fn draw_frequency_chart(frame: &mut Frame<'_>, transform: &Transform, sample_rate: f64) {
+pub fn draw_frequency_chart<T: Transformer>(
+    frame: &mut Frame<'_>,
+    transform: &T,
+    sample_rate: f64,
+) {
     let fft_data = transform.fft_data();
 
     let fft_len = fft_data.len();
@@ -145,7 +145,8 @@ pub fn draw_frequency_chart(frame: &mut Frame<'_>, transform: &Transform, sample
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_note(frame: &mut Frame<'_>, note: &Note, pixel_size: PixelSize, y_offset: u16) {
+pub fn draw_note(frame: &mut Frame<'_>, frequency: f64, pixel_size: PixelSize, y_offset: u16) {
+    let note = Note::new(frequency);
     if let Some(name) = note.name() {
         let target = Note::from_str(&name).expect("failed to get perfect note");
         // 1 semitone = 100 cents
