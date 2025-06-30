@@ -28,7 +28,9 @@ jobs:
           - command: fmt
             args: --all -- --check --color always
           - command: clippy
-            args: -- -D warnings
+            args: -p tuitar-tty -- -D warnings
+          - command: clippy
+            args: -p tuitar-embedded -- -D warnings
     steps:
       - name: Install dependencies
         run: |
