@@ -27,10 +27,12 @@ jobs:
           - command: build
             target: xtensa-esp32-espidf
             working-dir: tuitar-embedded
-          - command: clippy -- -D warnings
+          - command: clippy
+            args: -- -D warnings
             target: x86_64-unknown-linux-gnu
             working-dir: tuitar-tty
-          - command: clippy -- -D warnings
+          - command: clippy
+            args: -- -D warnings
             target: xtensa-esp32-espidf
             working-dir: tuitar-embedded
     steps:
@@ -54,7 +56,7 @@ jobs:
       - name: Run command
         run: |
           cd ${{ matrix.action.working-dir || '.' }}
-          cargo ${{ matrix.action.command }} --target ${{ matrix.action.target || 'x86_64-unknown-linux-gnu' }}
+          cargo ${{ matrix.action.command }} --target ${{ matrix.action.target || 'x86_64-unknown-linux-gnu' }} ${{ matrix.action.args || '' }}
 
   format:
     name: Format
