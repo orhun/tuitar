@@ -22,9 +22,9 @@ jobs:
       matrix:
         action:
           - command: build
-            args: --manifest-path tuitar-tty/Cargo.toml --target x86_64-unknown-linux-gnu
+            args: -p tuitar-tty --target x86_64-unknown-linux-gnu
           - command: build
-            args: --manifest-path tuitar-embedded/Cargo.toml --target xtensa-esp32-espidf
+            args: -p tuitar-embedded
           - command: fmt
             args: --all -- --check --color always
           - command: clippy
