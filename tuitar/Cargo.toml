@@ -6,7 +6,7 @@ edition.workspace = true
 
 [dependencies]
 colorgrad = "0.7.1"
-pitchy = "0.1.1"
+pitchy.workspace = true
 ratatui.workspace = true
 tui-bar-graph = "0.1.1"
 tui-big-text.workspace = true

@@ -2,9 +2,11 @@ mod transform;
 
 use std::error::Error;
 use std::time::Instant;
+use std::collections::{HashMap, VecDeque};
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
 use mousefood::prelude::*;
+use pitchy::Note;
 
 use embedded_hal::spi::MODE_3;
 
@@ -105,6 +107,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
 
+    let mut note_history: VecDeque<f64> = VecDeque::new();
+    let max_history = 2;
     let mut transform = Transform::new();
 
     loop {
@@ -121,6 +125,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         let sample_rate = samples.len() as f64 / elapsed.as_secs_f64();
 
         let fundamental_freq = transform.find_fundamental_frequency(sample_rate);
+        if Note::new(fundamental_freq).name().is_some() {
+            note_history.push_back(fundamental_freq);
+            if note_history.len() > max_history {
+                note_history.pop_front();
+            }
+        }
 
         log::info!(
             "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
@@ -137,8 +147,21 @@ fn main() -> Result<(), Box<dyn Error>> {
                     2 => draw_frequency_chart(frame, &transform, buffer_size as f64),
                     _ => {}
                 }
-
-                draw_note(frame, fundamental_freq, PixelSize::Quadrant, 2);
+                let most_frequent_note = note_history
+                    .iter()
+                    .map(|f| *f as i32)
+                    .fold(HashMap::new(), |mut acc, freq| {
+                        *acc.entry(freq).or_insert(0) += 1;
+                        acc
+                    })
+                    .into_iter()
+                    .max_by_key(|&(_, count)| count)
+                    .map(|(freq_hz, _)| freq_hz as f64);
+                if let Some(most_frequent_note) = most_frequent_note {
+                    if most_frequent_note > 70.0 && most_frequent_note < 3000.0 {
+                        draw_note(frame, most_frequent_note, PixelSize::Quadrant, 2);
+                    }
+                }
             })
             .unwrap();
 

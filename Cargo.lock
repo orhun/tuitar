@@ -2279,6 +2279,7 @@ dependencies = [
  "mipidsi",
  "mousefood",
  "num-complex",
+ "pitchy",
  "tui-big-text",
  "tuitar",
 ]
