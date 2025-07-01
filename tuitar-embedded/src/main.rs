@@ -1,8 +1,8 @@
 mod transform;
 
+use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::time::Instant;
-use std::collections::{HashMap, VecDeque};
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
 use mousefood::prelude::*;
