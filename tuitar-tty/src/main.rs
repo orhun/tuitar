@@ -47,7 +47,10 @@ fn main() {
                     }
                     _ => {}
                 }
-                draw_note(frame, fundamental_freq, PixelSize::Full, 5);
+
+                if fundamental_freq > 70.0 && fundamental_freq < 3000.0 {
+                    draw_note(frame, fundamental_freq, PixelSize::Full, 5);
+                }
             })
             .unwrap();
         if let Ok(v) = rx.try_recv() {
