@@ -2289,6 +2289,7 @@ name = "tuitar-tty"
 version = "0.1.0"
 dependencies = [
  "cpal",
+ "pitchy",
  "ratatui",
  "rustfft",
  "tui-big-text",
