@@ -6,6 +6,7 @@ use std::time::Instant;
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
 use mousefood::prelude::*;
+use mousefood::ratatui::layout::Offset;
 use pitchy::Note;
 
 use embedded_hal::spi::MODE_3;
@@ -102,7 +103,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let buffer_size = 1024;
     let mut samples = Vec::with_capacity(buffer_size);
-    let mode = 1;
+    let mode = 3;
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
@@ -145,6 +146,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                     0 => draw_waveform(frame, &samples, sample_rate, (512., 1536.)),
                     1 => draw_frequency(frame, &transform, sample_rate),
                     2 => draw_frequency_chart(frame, &transform, buffer_size as f64),
+                    3 => draw_fretboard(
+                        frame,
+                        fundamental_freq,
+                        frame.area().offset(Offset { x: 0, y: 3 }),
+                        6,
+                    ),
                     _ => {}
                 }
                 let most_frequent_note = note_history
@@ -159,7 +166,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .map(|(freq_hz, _)| freq_hz as f64);
                 if let Some(most_frequent_note) = most_frequent_note {
                     if most_frequent_note > 70.0 && most_frequent_note < 3000.0 {
-                        draw_note(frame, most_frequent_note, PixelSize::Quadrant, 2);
+                        draw_note(frame, most_frequent_note, PixelSize::Quadrant, 2, false);
                     }
                 }
             })

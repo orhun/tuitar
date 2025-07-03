@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use pitchy::Note;
-use ratatui::layout::{Alignment, Margin, Offset};
+use ratatui::layout::{Alignment, Margin, Offset, Rect};
 use ratatui::style::Color;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, LineGauge};
@@ -11,6 +11,7 @@ use ratatui::{
     symbols,
     widgets::{Axis, Chart, Dataset, GraphType},
 };
+use ratatui_fretboard::{Fretboard, FretboardState};
 use tui_bar_graph::{BarGraph, BarStyle, ColorMode};
 use tui_big_text::{BigText, PixelSize};
 
@@ -145,8 +146,25 @@ pub fn draw_frequency_chart<T: Transformer>(
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_note(frame: &mut Frame<'_>, frequency: f64, pixel_size: PixelSize, y_offset: u16) {
+pub fn draw_fretboard(frame: &mut Frame<'_>, frequency: f64, area: Rect, frets: u8) {
     let note = Note::new(frequency);
+    let fretboard = Fretboard::default().with_frets(0..=frets);
+    let mut state = FretboardState::default();
+    if let Ok(note) = note.try_into() {
+        state.set_active_note(note);
+    }
+    frame.render_stateful_widget(fretboard, area, &mut state);
+}
+
+pub fn draw_note(
+    frame: &mut Frame<'_>,
+    frequency: f64,
+    pixel_size: PixelSize,
+    y_offset: u16,
+    fretboard: bool,
+) {
+    let note = Note::new(frequency);
+
     if let Some(name) = note.name() {
         let target = Note::from_str(&name).expect("failed to get perfect note");
         // 1 semitone = 100 cents
@@ -238,5 +256,15 @@ pub fn draw_note(frame: &mut Frame<'_>, frequency: f64, pixel_size: PixelSize, y
                 vertical: 0,
             });
         frame.render_widget(freq_line, text_area);
+
+        if fretboard {
+            let mut area = area.offset(Offset {
+                x: (frame.area().width as i32 - 51) / 2,
+                y: y_offset as i32 + 4,
+            });
+            area.width = 51;
+
+            draw_fretboard(frame, note.frequency(), area, 12);
+        }
     }
 }
