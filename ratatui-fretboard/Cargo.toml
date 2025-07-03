@@ -1,0 +1,19 @@
+[package]
+name = "ratatui-fretboard"
+description = "Guitar fretboard widget for Ratatui"
+documentation = "https://docs.rs/ratatui-fretboard"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["ratatui", "fretboard", "guitar", "widget"]
+categories = ["command-line-interface", "gui"]
+
+[dependencies]
+ratatui.workspace = true
+pitchy.workspace = true
+
+[dev-dependencies]
+rstest = "0.25.0"

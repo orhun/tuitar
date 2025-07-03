@@ -4,6 +4,7 @@ members = [
   "tuitar",
   "tuitar-embedded",
   "tuitar-tty",
+  "ratatui-fretboard",
 ]
 
 [workspace.package]
@@ -19,6 +20,7 @@ tuitar = { path = "tuitar" }
 ratatui = { version = "0.29.0", default-features = false }
 tui-big-text = "=0.7.0"
 pitchy = "0.1.1"
+ratatui-fretboard = { path = "ratatui-fretboard" }
 
 [profile.release]
 opt-level = 3
