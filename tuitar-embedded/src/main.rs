@@ -5,6 +5,7 @@ use std::error::Error;
 use std::time::Instant;
 
 use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
+use esp_idf_svc::hal::gpio::{InterruptType, Pull};
 use mousefood::prelude::*;
 use mousefood::ratatui::layout::Offset;
 use pitchy::Note;
@@ -72,6 +73,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         buffer,
     );
 
+    let mut button = PinDriver::input(peripherals.pins.gpio0).unwrap();
+    button.set_interrupt_type(InterruptType::NegEdge).unwrap();
+    button.set_pull(Pull::Up).unwrap();
+
     // Configure display
     let mut delay = Ets;
     let mut display = Builder::new(ST7789, spi_interface)
@@ -103,7 +108,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let buffer_size = 1024;
     let mut samples = Vec::with_capacity(buffer_size);
-    let mode = 3;
+    let mut mode = 0;
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
@@ -171,6 +176,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             })
             .unwrap();
+
+        if button.is_low() {
+            Ets::delay_ms(10);
+            mode = (mode + 1) % 4;
+        }
 
         samples.clear();
     }
