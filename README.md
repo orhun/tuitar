@@ -10,7 +10,13 @@ Learning how to play guitar with a TUI - hence _Tuitar_.
 
 ## Demo
 
+With microphone input:
+
 https://github.com/user-attachments/assets/1922a316-57ff-4f3d-92eb-5ba5ff0dfdd8
+
+With jack input:
+
+https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0
 
 ## BOM
 
