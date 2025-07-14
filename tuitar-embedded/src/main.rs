@@ -148,7 +148,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         terminal
             .draw(|frame| {
                 match mode {
-                    0 => draw_waveform(frame, &samples, sample_rate, (512., 1536.)),
+                    0 => draw_waveform(frame, &samples, sample_rate, (512., 3300.)),
                     1 => draw_frequency(frame, &transform, sample_rate),
                     2 => draw_frequency_chart(frame, &transform, buffer_size as f64),
                     3 => draw_fretboard(
@@ -171,7 +171,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .map(|(freq_hz, _)| freq_hz as f64);
                 if let Some(most_frequent_note) = most_frequent_note {
                     if most_frequent_note > 70.0 && most_frequent_note < 3000.0 {
-                        draw_note(frame, most_frequent_note, PixelSize::Quadrant, 2, false);
+                        let pixel_size = (mode != 3).then_some(PixelSize::Quadrant);
+                        draw_note(frame, most_frequent_note, pixel_size, 2, false);
                     }
                 }
             })

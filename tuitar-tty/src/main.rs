@@ -70,7 +70,7 @@ fn main() {
                     .map(|(freq_hz, _)| freq_hz as f64);
                 if let Some(most_frequent_note) = most_frequent_note {
                     if most_frequent_note > 70.0 && most_frequent_note < 3000.0 {
-                        draw_note(frame, most_frequent_note, PixelSize::Full, 5, true);
+                        draw_note(frame, most_frequent_note, Some(PixelSize::Full), 5, true);
                     }
                 }
             })

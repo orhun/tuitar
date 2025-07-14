@@ -148,7 +148,10 @@ pub fn draw_frequency_chart<T: Transformer>(
 
 pub fn draw_fretboard(frame: &mut Frame<'_>, frequency: f64, area: Rect, frets: u8) {
     let note = Note::new(frequency);
-    let fretboard = Fretboard::default().with_frets(0..=frets);
+    let fretboard = Fretboard::default()
+        .with_frets(0..=frets)
+        .with_active_note_symbol('⬤')
+        .with_active_note_style(Color::Yellow.into());
     let mut state = FretboardState::default();
     if let Ok(note) = note.try_into() {
         state.set_active_note(note);
@@ -159,77 +162,89 @@ pub fn draw_fretboard(frame: &mut Frame<'_>, frequency: f64, area: Rect, frets: 
 pub fn draw_note(
     frame: &mut Frame<'_>,
     frequency: f64,
-    pixel_size: PixelSize,
+    pixel_size: Option<PixelSize>,
     y_offset: u16,
     fretboard: bool,
 ) {
     let note = Note::new(frequency);
+    let Some(name) = note.name() else {
+        return;
+    };
 
-    if let Some(name) = note.name() {
-        let target = Note::from_str(&name).expect("failed to get perfect note");
-        // 1 semitone = 100 cents
-        // 1200 cents = 1 octave
-        // cents = 1200 * log2(note.frequency() / target.frequency())
-        let cents = 1200.0 * (note.frequency() / target.frequency()).log2();
+    let target = Note::from_str(&name).expect("failed to get perfect note");
+    // 1 semitone = 100 cents
+    // 1200 cents = 1 octave
+    // cents = 1200 * log2(note.frequency() / target.frequency())
+    let cents = 1200.0 * (note.frequency() / target.frequency()).log2();
 
-        // One character represents 10 cents, max 5 characters
-        let n = (cents.abs() / 10.0).round() as usize;
-        let n = n.min(5);
+    // One character represents 10 cents, max 5 characters
+    let n = (cents.abs() / 10.0).round() as usize;
+    let n = n.min(5);
 
-        let mut spans = Vec::new();
-        if cents.abs() < 1.0 {
-            spans.push(Span::raw("["));
-            spans.push(name.green());
-            spans.push(Span::raw("]"));
-        } else if cents > 0.0 {
-            spans.push(Span::raw(" ".repeat(n)));
-            spans.push(name.blue());
-            spans.push(Span::styled(".".repeat(n), Color::Green));
-        } else {
-            spans.push(Span::styled(".".repeat(n), Color::Red));
-            spans.push(name.blue());
-            spans.push(Span::raw(" ".repeat(n)));
-        };
+    let mut spans = Vec::new();
+    if cents.abs() < 1.0 {
+        spans.push(Span::raw("["));
+        spans.push(name.to_string().green());
+        spans.push(Span::raw("]"));
+    } else if cents > 0.0 {
+        spans.push(Span::raw(" ".repeat(n)));
+        spans.push(name.to_string().blue());
+        spans.push(Span::styled(".".repeat(n), Color::Green));
+    } else {
+        spans.push(Span::styled(".".repeat(n), Color::Red));
+        spans.push(name.to_string().blue());
+        spans.push(Span::raw(" ".repeat(n)));
+    };
 
-        let text = vec![Line::from(spans)];
+    let text = vec![Line::from(spans)];
 
-        let cents = cents.clamp(-50.0, 50.0);
-        let ratio = ((cents + 50.0) / 100.0).clamp(0.0, 1.0);
+    let cents = cents.clamp(-50.0, 50.0);
+    let ratio = ((cents + 50.0) / 100.0).clamp(0.0, 1.0);
 
-        let label = if cents.abs() < 1.0 {
-            "✓ in tune".to_string()
-        } else if cents > 0.0 {
-            format!("+{:.1}c", cents)
-        } else {
-            format!("{:.1}c", cents)
-        };
+    let label = if cents.abs() < 1.0 {
+        "✓ in tune".to_string()
+    } else if cents > 0.0 {
+        format!("+{:.1}c", cents)
+    } else {
+        format!("{:.1}c", cents)
+    };
 
-        let (filled_style, unfilled_style) = if cents < 0.0 {
-            (
-                Style::new().white().on_red().bold(),
-                Style::new().gray().on_black(),
-            )
-        } else {
-            (
-                Style::new().white().on_green().bold(),
-                Style::new().gray().on_black(),
-            )
-        };
+    let (filled_style, unfilled_style) = if cents < 0.0 {
+        (
+            Style::new().white().on_red().bold(),
+            Style::new().gray().on_black(),
+        )
+    } else {
+        (
+            Style::new().white().on_green().bold(),
+            Style::new().gray().on_black(),
+        )
+    };
 
-        let gauge = LineGauge::default()
-            .filled_style(filled_style)
-            .unfilled_style(unfilled_style)
-            .label(Line::from(label).italic())
-            .ratio(ratio);
+    let gauge = LineGauge::default()
+        .filled_style(filled_style)
+        .unfilled_style(unfilled_style)
+        .label(Line::from(label).italic())
+        .ratio(ratio);
 
-        frame.render_widget(
-            gauge,
-            frame.area().inner(Margin {
-                horizontal: frame.area().width / 5,
-                vertical: 0,
-            }),
-        );
+    let gauge_area = frame.area().inner(Margin {
+        horizontal: frame.area().width / 5,
+        vertical: 0,
+    });
 
+    frame.render_widget(gauge, gauge_area);
+
+    frame.render_widget(name.bold(), {
+        let mut area = gauge_area.clone();
+        area.x = gauge_area.right() + 1;
+        area
+    });
+
+    let area = frame.area().offset(Offset {
+        x: 0,
+        y: (frame.area().height / 2).saturating_sub(y_offset) as i32,
+    });
+    if let Some(pixel_size) = pixel_size {
         let big_text = BigText::builder()
             .pixel_size(pixel_size)
             .style(Color::Blue)
@@ -237,10 +252,6 @@ pub fn draw_note(
             .alignment(Alignment::Center)
             .build();
 
-        let area = frame.area().offset(Offset {
-            x: 0,
-            y: (frame.area().height / 2).saturating_sub(y_offset) as i32,
-        });
         frame.render_widget(big_text, area);
 
         let freq_text = format!("{:.2} Hz", note.frequency());
@@ -256,15 +267,15 @@ pub fn draw_note(
                 vertical: 0,
             });
         frame.render_widget(freq_line, text_area);
+    }
 
-        if fretboard {
-            let mut area = area.offset(Offset {
-                x: (frame.area().width as i32 - 51) / 2,
-                y: y_offset as i32 + 4,
-            });
-            area.width = 51;
+    if fretboard {
+        let mut area = area.offset(Offset {
+            x: (frame.area().width as i32 - 51) / 2,
+            y: y_offset as i32 + 4,
+        });
+        area.width = 51;
 
-            draw_fretboard(frame, note.frequency(), area, 12);
-        }
+        draw_fretboard(frame, note.frequency(), area, 12);
     }
 }
