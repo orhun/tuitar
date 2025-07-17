@@ -73,9 +73,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         buffer,
     );
 
-    let mut button = PinDriver::input(peripherals.pins.gpio0).unwrap();
-    button.set_interrupt_type(InterruptType::NegEdge).unwrap();
-    button.set_pull(Pull::Up).unwrap();
+    let mut button1 = PinDriver::input(peripherals.pins.gpio0).unwrap();
+    button1.set_interrupt_type(InterruptType::NegEdge).unwrap();
+    button1.set_pull(Pull::Up).unwrap();
+
+    let mut button2 = PinDriver::input(peripherals.pins.gpio35).unwrap();
+    button2.set_interrupt_type(InterruptType::NegEdge).unwrap();
 
     // Configure display
     let mut delay = Ets;
@@ -93,10 +96,34 @@ fn main() -> Result<(), Box<dyn Error>> {
         .clear(Rgb565::BLACK)
         .expect("Failed to clear display");
 
-    let adc_driver = AdcDriver::new(peripherals.adc1).unwrap();
-    let mut mic_adc_channel = AdcChannelDriver::new(
-        &adc_driver,
+    let adc1_driver = AdcDriver::new(peripherals.adc1).unwrap();
+    let mut jack_adc_channel = AdcChannelDriver::new(
+        &adc1_driver,
         peripherals.pins.gpio36,
+        &AdcChannelConfig {
+            attenuation: DB_11,
+            calibration: Calibration::Line,
+            // Sample unsigned 12-bit integers (0-4095)
+            resolution: Resolution::Resolution12Bit,
+        },
+    )
+    .unwrap();
+
+    let mut mic_adc_channel = AdcChannelDriver::new(
+        &adc1_driver,
+        peripherals.pins.gpio32,
+        &AdcChannelConfig {
+            attenuation: DB_11,
+            calibration: Calibration::Line,
+            // Sample unsigned 12-bit integers (0-4095)
+            resolution: Resolution::Resolution12Bit,
+        },
+    )
+    .unwrap();
+
+    let mut pot = AdcChannelDriver::new(
+        &adc1_driver,
+        peripherals.pins.gpio33,
         &AdcChannelConfig {
             attenuation: DB_11,
             calibration: Calibration::Line,
@@ -117,10 +144,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let max_history = 2;
     let mut transform = Transform::new();
 
+    let mut input_mode = 0;
+
     loop {
         let instant = Instant::now();
         while samples.len() < buffer_size {
-            let raw = mic_adc_channel.read().unwrap_or(0);
+            let raw = match input_mode {
+                0 => mic_adc_channel.read().unwrap_or(0),
+                1 => jack_adc_channel.read().unwrap_or(0),
+                _ => mic_adc_channel.read().unwrap_or(0),
+            };
             samples.push(raw as i16);
         }
 
@@ -145,10 +178,12 @@ fn main() -> Result<(), Box<dyn Error>> {
             fundamental_freq
         );
 
+        let pot_val = pot.read().unwrap_or(1000) as f64;
+
         terminal
             .draw(|frame| {
                 match mode {
-                    0 => draw_waveform(frame, &samples, sample_rate, (512., 3300.)),
+                    0 => draw_waveform(frame, &samples, sample_rate, (pot_val, pot_val + 500.)),
                     1 => draw_frequency(frame, &transform, sample_rate),
                     2 => draw_frequency_chart(frame, &transform, buffer_size as f64),
                     3 => draw_fretboard(
@@ -175,10 +210,29 @@ fn main() -> Result<(), Box<dyn Error>> {
                         draw_note(frame, most_frequent_note, pixel_size, 2, false);
                     }
                 }
+                let input_mode_letter = match input_mode {
+                    0 => "M",
+                    1 => "J",
+                    _ => "?",
+                };
+                frame.render_widget(
+                    input_mode_letter,
+                    Rect::new(
+                        frame.area().right().saturating_sub(1),
+                        frame.area().top().saturating_sub(1),
+                        1,
+                        1,
+                    ),
+                );
             })
             .unwrap();
 
-        if button.is_low() {
+        if button2.is_low() {
+            Ets::delay_ms(10);
+            input_mode = (input_mode + 1) % 2;
+        }
+
+        if button1.is_low() {
             Ets::delay_ms(10);
             mode = (mode + 1) % 4;
         }
