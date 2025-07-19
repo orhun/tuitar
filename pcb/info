@@ -4,7 +4,7 @@
   "name": "tuitar",
   "content": "",
   "created_at": "2025-07-12 23:35:06",
-  "updated_at": "2025-07-19 23:25:44",
+  "updated_at": "2025-07-20 00:58:36",
   "stick": "",
   "documents": [
     {
@@ -20,12 +20,14 @@
         "24eeb2ceca08480b92b847b6a310acda": 1,
         "dcbf8ae195b644cc87dce71ee3ad3775": 1,
         "3ec77201bbcd4ecd8722658d581a4e60": 2,
-        "908ced202529416bac1203a9b300d842": 1,
-        "e545f26e87c74952857381bd0bff848e": 2,
         "5cbe824183374fac8e4c1ae848199ce3": 1,
         "e0b0d01b6e0d44dbab9db0ad79a427bc": 2,
-        "212e295d76c54814b12f2a568c1e0e5a": 1,
-        "218c3ad7498042a78b622f5ae5be7c02": 1
+        "e935ecbf49b04a899b1eb8d43dd5aab6": 1,
+        "fce37badfb4d4d19b0a1f8eb476db526": 2,
+        "1c5b39ac72514ccd8747bf87ab52b20b": 1,
+        "7cfbda46d1744440b19070d87f120547": 1,
+        "a60b03360cc3498fbc6d57095be53549": 1,
+        "2d5b6c68623142cb879a8f5868e44e03": 1
       },
       "BOM": [
         [
@@ -60,18 +62,6 @@
           }
         ],
         [
-          "10uF",
-          2,
-          "CAP-2.5MM",
-          "C2,C3",
-          {
-            "Manufacturer Part": "",
-            "Manufacturer": "",
-            "Supplier": "",
-            "Supplier Part": ""
-          }
-        ],
-        [
           "1N5819",
           1,
           "DIODE-AXIAL-7.62",
@@ -96,6 +86,18 @@
           }
         ],
         [
+          "TFT 1.8 ST7735",
+          1,
+          "1.8TFT_SPI_128X160",
+          "LCD1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
           "LED-0603_R",
           1,
           "LED-5MM-2.54MM",
@@ -105,18 +107,6 @@
             "Manufacturer": "EVERLIGHT(台湾亿光)",
             "Supplier": "LCSC",
             "Supplier Part": "C72044"
-          }
-        ],
-        [
-          "MIC",
-          1,
-          "CONN-TH_M3025V-1X3P",
-          "MAX4466",
-          {
-            "Manufacturer Part": "M3025V-1x3P",
-            "Manufacturer": "XFCN(兴飞)",
-            "Supplier": "LCSC",
-            "Supplier Part": "C705183"
           }
         ],
         [
@@ -156,6 +146,30 @@
           }
         ],
         [
+          "Switch_SW_Push",
+          2,
+          "CUSTOMBUTTON:CUSTOM_BUTTON",
+          "SW1,SW2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "SK-12D02-VG5",
+          1,
+          "SW-TH_SK-12D02VG3",
+          "SW3",
+          {
+            "Manufacturer Part": "SK-12D02-VG5",
+            "Manufacturer": "Rectangular Connectors - Contacts",
+            "Supplier": "LCSC",
+            "Supplier Part": "C136722"
+          }
+        ],
+        [
           "LM358P",
           1,
           "DIP-8_L9.4-W6.4-P2.54-LS9.1-BL",
@@ -168,35 +182,47 @@
           }
         ],
         [
-          "AMS1117-3.3V",
+          "MAX4466",
           1,
-          "SOT-223-4_L6.5-W3.5-P2.30-LS7.0-BR",
-          "U2",
+          "MAX4466",
+          "U3",
           {
-            "Manufacturer Part": "AMS1117-3.3V",
-            "Manufacturer": "WPMtek(维攀)",
-            "Supplier": "LCSC",
-            "Supplier Part": "C2688239"
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
           }
         ],
         [
-          "ESP32 TTGO-T-Display",
+          "MP1584-Buck-Converter",
           1,
-          "TTGO-T-DISPLAY-OL",
-          "U3",
+          "MP1584EN-BUCK-CONVERTER",
+          "U4",
           {
-            "Manufacturer Part": "TTGO T-Display ESP32",
-            "Manufacturer": "TTGO",
-            "Supplier": "Lilygo",
+            "Manufacturer Part": "MP1584EN",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "ESP-WROOM-32-DEVKIT",
+          1,
+          "ESP-WROOM-32-DEVKIT-PCB",
+          "U6",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
             "Supplier Part": ""
           }
         ]
       ],
-      "updateTime": 1752956744,
+      "updateTime": 1752961888,
       "createTime": 1752352507,
       "histories": [],
       "created_at": "2025-07-12 23:35:07",
-      "updated_at": "2025-07-19 23:25:44"
+      "updated_at": "2025-07-20 00:51:28"
     },
     {
       "uuid": "464fa7df1a2a2304b08c98b936bd652f",
@@ -211,11 +237,230 @@
       "histories": [],
       "created_at": "2025-07-19 23:22:02",
       "updated_at": "2025-07-19 23:22:02"
+    },
+    {
+      "uuid": "9626d419e2487cf30c0f449cae751934",
+      "puuid": "8c9af39cf574d239a26244c37c11bd2b",
+      "title": "PCB_tuitar_2",
+      "filename": "PCB_tuitar_2.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "36b1306a115341f4b4d9407fb34974e0": 2,
+        "9fb409a400d74171a40d9b1f84bfe449": 1,
+        "bc045c8586664f0a9e6953c0963bead2": 1,
+        "c6faf26d6d4949cd9a542e52d6353d5c": 1,
+        "91a2770e27de4361ada545e09710b5cd": 1,
+        "5905db98cde4487fbb177070aa85bbe1": 5,
+        "d3d3fb3173c14d1a914400d718b4277a": 2,
+        "c157a7fe4f7747418c31b2a45d5e60b8": 2,
+        "85479227c6fd485eba9b7c55937c67d9": 1,
+        "5730e723e0a640398cdedbf314c06732": 1,
+        "2af8e94602fc42618cfa55ab0d8ba075": 1,
+        "a43b470925c94bf89b444918ec57f164": 1,
+        "6d8a9d61f0504c2faa41f6135ae340f8": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "9V",
+          1,
+          "HDR-F-2.54_1X2",
+          "9V",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": "C49661"
+          }
+        ],
+        [
+          "MONO JACK",
+          1,
+          "HDR-F-2.54_1X2",
+          "J1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": "C49661"
+          }
+        ],
+        [
+          "1uF",
+          1,
+          "CAP-2.5MM",
+          "C1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "1N5819",
+          1,
+          "DIODE-AXIAL-7.62",
+          "D1",
+          {
+            "Manufacturer Part": "1N5819HW",
+            "Manufacturer": "TECH PUBLIC(台舟)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2905649"
+          }
+        ],
+        [
+          "TFT 1.8 ST7735",
+          1,
+          "1.8TFT_SPI_128X160",
+          "LCD1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "LED-0603_R",
+          1,
+          "LED-5MM-2.54MM",
+          "LED1",
+          {
+            "Manufacturer Part": "19-217/R6C-AL1M2VY/3T",
+            "Manufacturer": "EVERLIGHT(台湾亿光)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C72044"
+          }
+        ],
+        [
+          "1k",
+          3,
+          "R_AXIAL-0.4",
+          "R1,R2,R5",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "10k",
+          2,
+          "R_AXIAL-0.4",
+          "R3,R4",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "R_3386P_US",
+          2,
+          "POT-HOLES",
+          "RP1,RP2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "Switch_SW_Push",
+          2,
+          "CUSTOMBUTTON:CUSTOM_BUTTON",
+          "SW1,SW2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "SK-12D02-VG5",
+          1,
+          "SW-TH_SK-12D02VG3",
+          "SW3",
+          {
+            "Manufacturer Part": "SK-12D02-VG5",
+            "Manufacturer": "Rectangular Connectors - Contacts",
+            "Supplier": "LCSC",
+            "Supplier Part": "C136722"
+          }
+        ],
+        [
+          "LM358P",
+          1,
+          "DIP-8_L9.4-W6.4-P2.54-LS9.1-BL",
+          "U1",
+          {
+            "Manufacturer Part": "LM358P",
+            "Manufacturer": "TI(德州仪器)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C5213"
+          }
+        ],
+        [
+          "MAX4466",
+          1,
+          "MAX4466",
+          "U3",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "MP1584-Buck-Converter",
+          1,
+          "MP1584EN-BUCK-CONVERTER",
+          "U4",
+          {
+            "Manufacturer Part": "MP1584EN",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "ESP-WROOM-32-DEVKIT",
+          1,
+          "ESP-WROOM-32-DEVKIT-PCB",
+          "U6",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ]
+      ],
+      "updateTime": 1752962316,
+      "createTime": 1752962294,
+      "histories": [],
+      "created_at": "2025-07-20 00:58:14",
+      "updated_at": "2025-07-20 00:58:36"
     }
   ],
   "sort": [],
   "title": "tuitar",
   "foldername": "tuitar",
   "schfilename": "tuitar.json",
-  "schfilemtime": 1752956744174
+  "schfilemtime": 1752961888165
 }
