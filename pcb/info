@@ -1,0 +1,221 @@
+{
+  "uuid": "8c9af39cf574d239a26244c37c11bd2b",
+  "path": "Offline/tuitar",
+  "name": "tuitar",
+  "content": "",
+  "created_at": "2025-07-12 23:35:06",
+  "updated_at": "2025-07-19 23:25:44",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "2c2f903c1108e06769a77c87fe24306e",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "479a6574d2db4ffbd83445509005d8be": 1,
+        "b0248eb51e084227889f2cb84eab79c4": 5,
+        "24eeb2ceca08480b92b847b6a310acda": 1,
+        "dcbf8ae195b644cc87dce71ee3ad3775": 1,
+        "3ec77201bbcd4ecd8722658d581a4e60": 2,
+        "908ced202529416bac1203a9b300d842": 1,
+        "e545f26e87c74952857381bd0bff848e": 2,
+        "5cbe824183374fac8e4c1ae848199ce3": 1,
+        "e0b0d01b6e0d44dbab9db0ad79a427bc": 2,
+        "212e295d76c54814b12f2a568c1e0e5a": 1,
+        "218c3ad7498042a78b622f5ae5be7c02": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "9V",
+          1,
+          "HDR-F-2.54_1X2",
+          "9V",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": "C49661"
+          }
+        ],
+        [
+          "1uF",
+          1,
+          "CAP-2.5MM",
+          "C1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "10uF",
+          2,
+          "CAP-2.5MM",
+          "C2,C3",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "1N5819",
+          1,
+          "DIODE-AXIAL-7.62",
+          "D1",
+          {
+            "Manufacturer Part": "1N5819HW",
+            "Manufacturer": "TECH PUBLIC(台舟)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2905649"
+          }
+        ],
+        [
+          "MONO JACK",
+          1,
+          "HDR-F-2.54_1X2",
+          "J1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": "C49661"
+          }
+        ],
+        [
+          "LED-0603_R",
+          1,
+          "LED-5MM-2.54MM",
+          "LED1",
+          {
+            "Manufacturer Part": "19-217/R6C-AL1M2VY/3T",
+            "Manufacturer": "EVERLIGHT(台湾亿光)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C72044"
+          }
+        ],
+        [
+          "MIC",
+          1,
+          "CONN-TH_M3025V-1X3P",
+          "MAX4466",
+          {
+            "Manufacturer Part": "M3025V-1x3P",
+            "Manufacturer": "XFCN(兴飞)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C705183"
+          }
+        ],
+        [
+          "1k",
+          3,
+          "R_AXIAL-0.4",
+          "R1,R2,R5",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "10k",
+          2,
+          "R_AXIAL-0.4",
+          "R3,R4",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "R_3386P_US",
+          2,
+          "POT-HOLES",
+          "RP1,RP2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "LM358P",
+          1,
+          "DIP-8_L9.4-W6.4-P2.54-LS9.1-BL",
+          "U1",
+          {
+            "Manufacturer Part": "LM358P",
+            "Manufacturer": "TI(德州仪器)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C5213"
+          }
+        ],
+        [
+          "AMS1117-3.3V",
+          1,
+          "SOT-223-4_L6.5-W3.5-P2.30-LS7.0-BR",
+          "U2",
+          {
+            "Manufacturer Part": "AMS1117-3.3V",
+            "Manufacturer": "WPMtek(维攀)",
+            "Supplier": "LCSC",
+            "Supplier Part": "C2688239"
+          }
+        ],
+        [
+          "ESP32 TTGO-T-Display",
+          1,
+          "TTGO-T-DISPLAY-OL",
+          "U3",
+          {
+            "Manufacturer Part": "TTGO T-Display ESP32",
+            "Manufacturer": "TTGO",
+            "Supplier": "Lilygo",
+            "Supplier Part": ""
+          }
+        ]
+      ],
+      "updateTime": 1752956744,
+      "createTime": 1752352507,
+      "histories": [],
+      "created_at": "2025-07-12 23:35:07",
+      "updated_at": "2025-07-19 23:25:44"
+    },
+    {
+      "uuid": "464fa7df1a2a2304b08c98b936bd652f",
+      "title": "PCB_tuitar",
+      "filename": "PCB_tuitar.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "updateTime": 1752956522,
+      "createTime": 1752956522,
+      "histories": [],
+      "created_at": "2025-07-19 23:22:02",
+      "updated_at": "2025-07-19 23:22:02"
+    }
+  ],
+  "sort": [],
+  "title": "tuitar",
+  "foldername": "tuitar",
+  "schfilename": "tuitar.json",
+  "schfilemtime": 1752956744174
+}
