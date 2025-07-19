@@ -375,7 +375,7 @@ impl StatefulWidget for Fretboard {
         let mut label_line = String::new();
         for (j, fret_num) in fret_labels.iter().enumerate() {
             if j == 0 {
-                label_line.push_str(&format!("{:>3}", fret_num));
+                label_line.push_str(&format!("{fret_num:>3}"));
             } else {
                 label_line.push_str(&format!("{:>width$}", fret_num, width = fret_width + 1));
             }
