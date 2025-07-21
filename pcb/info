@@ -4,12 +4,12 @@
   "name": "tuitar",
   "content": "",
   "created_at": "2025-07-12 23:35:06",
-  "updated_at": "2025-07-21 23:17:36",
+  "updated_at": "2025-07-22 00:32:01",
   "stick": "",
   "documents": [
     {
       "uuid": "2c2f903c1108e06769a77c87fe24306e",
-      "title": "Sheet_1",
+      "title": "schematics",
       "description": "",
       "docType": "1",
       "master": "",
@@ -27,7 +27,8 @@
         "1c5b39ac72514ccd8747bf87ab52b20b": 1,
         "7cfbda46d1744440b19070d87f120547": 1,
         "a60b03360cc3498fbc6d57095be53549": 1,
-        "2d5b6c68623142cb879a8f5868e44e03": 1
+        "2d5b6c68623142cb879a8f5868e44e03": 1,
+        "84e5f0c1244e4c5d84b82445a5afc890": 1
       },
       "BOM": [
         [
@@ -83,6 +84,18 @@
             "Manufacturer": "",
             "Supplier": "LCSC",
             "Supplier Part": "C49661"
+          }
+        ],
+        [
+          "HDR-M-2.54_1x8",
+          1,
+          "HDR-M-2.54_1X8",
+          "J2",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": "C190820"
           }
         ],
         [
@@ -218,40 +231,17 @@
           }
         ]
       ],
-      "updateTime": 1753129056,
+      "updateTime": 1753132116,
       "createTime": 1752352507,
       "histories": [],
       "created_at": "2025-07-12 23:35:07",
-      "updated_at": "2025-07-21 23:17:36"
+      "updated_at": "2025-07-22 00:08:36"
     },
     {
-      "uuid": "464fa7df1a2a2304b08c98b936bd652f",
-      "title": "PCB_tuitar",
-      "filename": "PCB_tuitar.json",
-      "description": "",
-      "docType": "3",
-      "master": "",
-      "thumb": "/images/thumb-default.png",
-      "updateTime": 1753101055,
-      "createTime": 1752956522,
-      "histories": [],
-      "created_at": "2025-07-19 23:22:02",
-      "updated_at": "2025-07-21 15:30:55",
-      "components": {
-        "36b1306a115341f4b4d9407fb34974e0": 3,
-        "f8151fdc728a41ebbc304e11d39e5437": 1,
-        "bbf2d74717914929b5e52e3caa0392b2": 1,
-        "19c77e72422b43b59c26b9fa67af5de4": 1,
-        "398691f1f785460098bbe5ee6590333c": 5,
-        "138a641d7b12499d8116e25bb56e2b7b": 1,
-        "5730e723e0a640398cdedbf314c06732": 1
-      }
-    },
-    {
-      "uuid": "9626d419e2487cf30c0f449cae751934",
+      "uuid": "a2ec2efa4c46dfe1d3ed4e7c820c6dc4",
       "puuid": "8c9af39cf574d239a26244c37c11bd2b",
-      "title": "PCB_tuitar_2",
-      "filename": "PCB_tuitar_2.json",
+      "title": "pcb",
+      "filename": "pcb.json",
       "description": "",
       "docType": "3",
       "master": "",
@@ -260,7 +250,6 @@
         "36b1306a115341f4b4d9407fb34974e0": 2,
         "9fb409a400d74171a40d9b1f84bfe449": 1,
         "bc045c8586664f0a9e6953c0963bead2": 1,
-        "c6faf26d6d4949cd9a542e52d6353d5c": 1,
         "91a2770e27de4361ada545e09710b5cd": 1,
         "5905db98cde4487fbb177070aa85bbe1": 5,
         "d3d3fb3173c14d1a914400d718b4277a": 2,
@@ -424,6 +413,18 @@
           }
         ],
         [
+          "TFT 1.8 ST7735",
+          1,
+          "POGOPIN-SMD_8P-P3.50_CON-8P-2.54MM_POGOPIN",
+          "U2",
+          {
+            "Manufacturer Part": "CON-8P-2.54MM_POGOPIN",
+            "Manufacturer": "null",
+            "Supplier": "LCSC",
+            "Supplier Part": "C9900149735"
+          }
+        ],
+        [
           "MAX4466",
           1,
           "MAX4466",
@@ -460,16 +461,16 @@
           }
         ]
       ],
-      "updateTime": 1753038308,
-      "createTime": 1752962294,
+      "updateTime": 1753133521,
+      "createTime": 1753131154,
       "histories": [],
-      "created_at": "2025-07-20 00:58:14",
-      "updated_at": "2025-07-20 22:05:08"
+      "created_at": "2025-07-21 23:52:34",
+      "updated_at": "2025-07-22 00:32:01"
     }
   ],
   "sort": [],
   "title": "tuitar",
   "foldername": "tuitar",
   "schfilename": "tuitar.json",
-  "schfilemtime": 1753129056114
+  "schfilemtime": 1753132116137
 }
