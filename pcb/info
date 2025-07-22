@@ -4,7 +4,7 @@
   "name": "tuitar",
   "content": "",
   "created_at": "2025-07-12 23:35:06",
-  "updated_at": "2025-07-22 00:32:01",
+  "updated_at": "2025-07-22 12:02:17",
   "stick": "",
   "documents": [
     {
@@ -27,8 +27,7 @@
         "1c5b39ac72514ccd8747bf87ab52b20b": 1,
         "7cfbda46d1744440b19070d87f120547": 1,
         "a60b03360cc3498fbc6d57095be53549": 1,
-        "2d5b6c68623142cb879a8f5868e44e03": 1,
-        "84e5f0c1244e4c5d84b82445a5afc890": 1
+        "2d5b6c68623142cb879a8f5868e44e03": 1
       },
       "BOM": [
         [
@@ -65,7 +64,7 @@
         [
           "1N5819",
           1,
-          "DIODE-AXIAL-7.62",
+          "DIODE-AXIAL-0.3",
           "D1",
           {
             "Manufacturer Part": "1N5819HW",
@@ -84,18 +83,6 @@
             "Manufacturer": "",
             "Supplier": "LCSC",
             "Supplier Part": "C49661"
-          }
-        ],
-        [
-          "HDR-M-2.54_1x8",
-          1,
-          "HDR-M-2.54_1X8",
-          "J2",
-          {
-            "Manufacturer Part": "",
-            "Manufacturer": "",
-            "Supplier": "LCSC",
-            "Supplier Part": "C190820"
           }
         ],
         [
@@ -231,11 +218,11 @@
           }
         ]
       ],
-      "updateTime": 1753132116,
+      "updateTime": 1753174792,
       "createTime": 1752352507,
       "histories": [],
       "created_at": "2025-07-12 23:35:07",
-      "updated_at": "2025-07-22 00:08:36"
+      "updated_at": "2025-07-22 11:59:52"
     },
     {
       "uuid": "a2ec2efa4c46dfe1d3ed4e7c820c6dc4",
@@ -247,16 +234,14 @@
       "master": "",
       "thumb": "/images/thumb-default.png",
       "components": {
+        "91a2770e27de4361ada545e09710b5cd": 1,
+        "c157a7fe4f7747418c31b2a45d5e60b8": 2,
         "36b1306a115341f4b4d9407fb34974e0": 2,
         "9fb409a400d74171a40d9b1f84bfe449": 1,
-        "bc045c8586664f0a9e6953c0963bead2": 1,
-        "91a2770e27de4361ada545e09710b5cd": 1,
         "5905db98cde4487fbb177070aa85bbe1": 5,
         "d3d3fb3173c14d1a914400d718b4277a": 2,
-        "c157a7fe4f7747418c31b2a45d5e60b8": 2,
         "85479227c6fd485eba9b7c55937c67d9": 1,
         "5730e723e0a640398cdedbf314c06732": 1,
-        "2af8e94602fc42618cfa55ab0d8ba075": 1,
         "a43b470925c94bf89b444918ec57f164": 1,
         "6d8a9d61f0504c2faa41f6135ae340f8": 1
       },
@@ -461,16 +446,16 @@
           }
         ]
       ],
-      "updateTime": 1753133521,
+      "updateTime": 1753174937,
       "createTime": 1753131154,
       "histories": [],
       "created_at": "2025-07-21 23:52:34",
-      "updated_at": "2025-07-22 00:32:01"
+      "updated_at": "2025-07-22 12:02:17"
     }
   ],
   "sort": [],
   "title": "tuitar",
   "foldername": "tuitar",
   "schfilename": "tuitar.json",
-  "schfilemtime": 1753132116137
+  "schfilemtime": 1753174792970
 }
