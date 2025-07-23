@@ -235,7 +235,7 @@ pub fn draw_note(
     frame.render_widget(gauge, gauge_area);
 
     frame.render_widget(name.bold(), {
-        let mut area = gauge_area.clone();
+        let mut area = gauge_area;
         area.x = gauge_area.right() + 1;
         area
     });
