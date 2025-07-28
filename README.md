@@ -1,3 +1,8 @@
+<p align="center">
+    <img src="https://raw.githubusercontent.com/orhun/tuitar/main/assets/tuitar-logo-dark.png#gh-dark-mode-only" width="300"></a>
+    <img src="https://raw.githubusercontent.com/orhun/tuitar/main/assets/tuitar-logo-light.png#gh-light-mode-only" width="300"></a>
+</p>
+
 # Tuitar 🎸
 
 Learning how to play guitar with a TUI - hence _Tuitar_.
