@@ -3,7 +3,7 @@
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-light.png#gh-light-mode-only" width="300"></a>
 </p>
 
-# Tuitar 🎸
+---
 
 Learning how to play guitar with a TUI - hence _Tuitar_.
 
