@@ -4,14 +4,7 @@ use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::time::Instant;
 
-use embedded_graphics::{pixelcolor::Rgb565, prelude::*};
 use esp_idf_svc::hal::gpio::{InterruptType, Pull};
-use mousefood::prelude::*;
-use mousefood::ratatui::layout::Offset;
-use pitchy::Note;
-
-use embedded_hal::spi::MODE_3;
-
 use esp_idf_svc::hal::{
     adc::{
         attenuation::DB_11,
@@ -22,21 +15,21 @@ use esp_idf_svc::hal::{
         Resolution,
     },
     delay::Ets,
-    gpio::{AnyIOPin, PinDriver},
+    delay::FreeRtos,
+    gpio::PinDriver,
     peripherals::Peripherals,
-    spi::{SpiConfig, SpiDeviceDriver, SpiDriverConfig},
+    spi::{SpiConfig, SpiDeviceDriver},
     units::*,
 };
-use mipidsi::options::{ColorInversion, Orientation, Rotation};
-use mipidsi::{interface::SpiInterface, models::ST7789, Builder};
+use mousefood::prelude::*;
+use mousefood::ratatui::layout::Offset;
+use pitchy::Note;
+use st7735_lcd::{Orientation, ST7735};
 use tui_big_text::PixelSize;
 use tuitar::transform::Transformer;
 
 use transform::Transform;
 use tuitar::ui::*;
-
-const DISPLAY_OFFSET: (u16, u16) = (52, 40);
-const DISPLAY_SIZE: (u16, u16) = (135, 240);
 
 fn main() -> Result<(), Box<dyn Error>> {
     // It is necessary to call this function once. Otherwise some patches to the runtime
@@ -48,53 +41,43 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let peripherals = Peripherals::take()?;
 
-    // Turn on display backlight
-    let mut backlight = PinDriver::output(peripherals.pins.gpio4)?;
-    backlight.set_high()?;
+    let spi = peripherals.spi2;
+    // HSPI SCK — default SPI2 clock pin, safe at boot
+    let sclk = peripherals.pins.gpio14;
+    // HSPI MOSI — default SPI2 data pin, safe at boot
+    let sdo = peripherals.pins.gpio13;
+    // MISO not used for display
+    let sdi = Option::<esp_idf_svc::hal::gpio::Gpio0>::None;
+    // CS — general-purpose pin, safe at boot
+    let cs = Some(peripherals.pins.gpio25);
+    // RESET — unused GPIO, safe and stable
+    let rst = PinDriver::output(peripherals.pins.gpio33)?;
+    // DC (AO) — general-purpose pin, safe at boot
+    let dc = PinDriver::output(peripherals.pins.gpio27)?;
 
-    // Configure SPI
-    let config = SpiConfig::new()
-        .write_only(true)
-        .baudrate(80u32.MHz().into())
-        .data_mode(MODE_3);
-    let spi_device = SpiDeviceDriver::new_single(
-        peripherals.spi2,
-        peripherals.pins.gpio18,
-        peripherals.pins.gpio19,
-        Option::<AnyIOPin>::None,
-        Some(peripherals.pins.gpio5),
-        &SpiDriverConfig::new(),
-        &config,
-    )?;
-    let buffer: &'static mut [u8; 512] = Box::leak(Box::new([0u8; 512]));
-    let spi_interface = SpiInterface::new(
-        spi_device,
-        PinDriver::output(peripherals.pins.gpio16)?,
-        buffer,
-    );
+    let driver_config = Default::default();
+    let spi_config = SpiConfig::new().baudrate(40u32.MHz().into());
 
-    let mut button1 = PinDriver::input(peripherals.pins.gpio0).unwrap();
+    let spi = SpiDeviceDriver::new_single(spi, sclk, sdo, sdi, cs, &driver_config, &spi_config)?;
+
+    let rgb = true;
+    let inverted = false;
+    let width = 160;
+    let height = 128;
+
+    let mut delay = FreeRtos;
+    let mut display = ST7735::new(spi, dc, rst, rgb, inverted, width, height);
+
+    display.init(&mut delay).unwrap();
+    display.set_orientation(&Orientation::Landscape).unwrap();
+
+    let mut button1 = PinDriver::input(peripherals.pins.gpio22).unwrap();
     button1.set_interrupt_type(InterruptType::NegEdge).unwrap();
     button1.set_pull(Pull::Up).unwrap();
 
-    let mut button2 = PinDriver::input(peripherals.pins.gpio35).unwrap();
+    let mut button2 = PinDriver::input(peripherals.pins.gpio21).unwrap();
     button2.set_interrupt_type(InterruptType::NegEdge).unwrap();
-
-    // Configure display
-    let mut delay = Ets;
-    let mut display = Builder::new(ST7789, spi_interface)
-        .invert_colors(ColorInversion::Inverted)
-        .reset_pin(PinDriver::output(peripherals.pins.gpio23)?)
-        .display_offset(DISPLAY_OFFSET.0, DISPLAY_OFFSET.1)
-        .display_size(DISPLAY_SIZE.0, DISPLAY_SIZE.1)
-        .orientation(Orientation::new().rotate(Rotation::Deg90))
-        .init(&mut delay)
-        .expect("Failed to init display");
-
-    // Reset pixels
-    display
-        .clear(Rgb565::BLACK)
-        .expect("Failed to clear display");
+    button2.set_pull(Pull::Up).unwrap();
 
     let adc1_driver = AdcDriver::new(peripherals.adc1).unwrap();
     let mut jack_adc_channel = AdcChannelDriver::new(
@@ -123,7 +106,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut pot = AdcChannelDriver::new(
         &adc1_driver,
-        peripherals.pins.gpio33,
+        peripherals.pins.gpio39,
         &AdcChannelConfig {
             attenuation: DB_11,
             calibration: Calibration::Line,
@@ -227,14 +210,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             })
             .unwrap();
 
-        if button2.is_low() {
-            Ets::delay_ms(10);
-            input_mode = (input_mode + 1) % 2;
-        }
-
         if button1.is_low() {
             Ets::delay_ms(10);
             mode = (mode + 1) % 4;
+        }
+
+        if button2.is_low() {
+            Ets::delay_ms(10);
+            input_mode = (input_mode + 1) % 2;
         }
 
         samples.clear();
