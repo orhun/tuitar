@@ -11,3 +11,4 @@ ratatui.workspace = true
 tui-bar-graph = "0.1.1"
 tui-big-text.workspace = true
 ratatui-fretboard.workspace = true
+log.workspace = true
