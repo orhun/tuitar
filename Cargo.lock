@@ -2350,6 +2350,7 @@ name = "tuitar"
 version = "0.1.0"
 dependencies = [
  "colorgrad",
+ "log",
  "pitchy",
  "ratatui",
  "ratatui-fretboard",
@@ -2361,6 +2362,7 @@ dependencies = [
 name = "tuitar-embedded"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "embedded-graphics",
  "embedded-hal 1.0.0",
  "embuild",

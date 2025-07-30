@@ -1,6 +1,3 @@
-use std::str::FromStr;
-
-use pitchy::Note;
 use ratatui::layout::{Alignment, Margin, Offset, Rect};
 use ratatui::style::Color;
 use ratatui::text::{Line, Span};
@@ -13,17 +10,19 @@ use ratatui::{
 };
 use ratatui_fretboard::{Fretboard, FretboardState};
 use tui_bar_graph::{BarGraph, BarStyle, ColorMode};
-use tui_big_text::{BigText, PixelSize};
+use tui_big_text::BigText;
 
+use crate::state::State;
 use crate::transform::Transformer;
 
-pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, bounds: (f64, f64)) {
-    let duration = samples.len() as f64 / sample_rate;
-    let data_points: Vec<(f64, f64)> = samples
+pub fn draw_waveform<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>, bounds: (f64, f64)) {
+    let duration = state.samples.len() as f64 / state.sample_rate;
+    let data_points: Vec<(f64, f64)> = state
+        .samples
         .iter()
         .enumerate()
         .map(|(i, &sample)| {
-            let time_in_seconds = (i as f64) / sample_rate;
+            let time_in_seconds = (i as f64) / state.sample_rate;
             (time_in_seconds, sample as f64)
         })
         .collect();
@@ -63,11 +62,11 @@ pub fn draw_waveform(frame: &mut Frame<'_>, samples: &[i16], sample_rate: f64, b
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, transform: &T, sample_rate: f64) {
-    let data_points = transform.fft_data();
+pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+    let data_points = state.transform.fft_data();
 
     let fft_size = data_points.len();
-    let freq_per_bin = sample_rate as f32 / fft_size as f32;
+    let freq_per_bin = state.sample_rate as f32 / fft_size as f32;
 
     // Calculate bin indices for 20Hz and 20kHz
     let start_bin = (20.0 / freq_per_bin).ceil() as usize;
@@ -97,15 +96,11 @@ pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, transform: &T, samp
 }
 
 // TODO: needs fixing
-pub fn draw_frequency_chart<T: Transformer>(
-    frame: &mut Frame<'_>,
-    transform: &T,
-    sample_rate: f64,
-) {
-    let fft_data = transform.fft_data();
+pub fn draw_frequency_chart<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+    let fft_data = state.transform.fft_data();
 
     let fft_len = fft_data.len();
-    let freq_step = sample_rate / (2.0 * fft_len as f64); // Nyquist range
+    let freq_step = state.sample_rate / (2.0 * fft_len as f64); // Nyquist range
 
     let data_points: Vec<(f64, f64)> = fft_data
         .iter()
@@ -146,10 +141,12 @@ pub fn draw_frequency_chart<T: Transformer>(
     frame.render_widget(chart, frame.area());
 }
 
-pub fn draw_fretboard(frame: &mut Frame<'_>, frequency: f64, area: Rect, frets: u8) {
-    let note = Note::new(frequency);
+pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
+    let Some((note, _)) = state.get_current_note() else {
+        return;
+    };
     let fretboard = Fretboard::default()
-        .with_frets(0..=frets)
+        .with_frets(0..=state.fret_count)
         .with_active_note_symbol('⬤')
         .with_active_note_style(Color::Yellow.into());
     let mut state = FretboardState::default();
@@ -159,44 +156,10 @@ pub fn draw_fretboard(frame: &mut Frame<'_>, frequency: f64, area: Rect, frets: 
     frame.render_stateful_widget(fretboard, area, &mut state);
 }
 
-pub fn draw_note(
-    frame: &mut Frame<'_>,
-    frequency: f64,
-    pixel_size: Option<PixelSize>,
-    y_offset: u16,
-    fretboard: bool,
-) {
-    let note = Note::new(frequency);
-    let Some(name) = note.name() else {
+pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+    let Some((note, cents)) = state.get_current_note() else {
         return;
     };
-
-    let target = Note::from_str(&name).expect("failed to get perfect note");
-    // 1 semitone = 100 cents
-    // 1200 cents = 1 octave
-    // cents = 1200 * log2(note.frequency() / target.frequency())
-    let cents = 1200.0 * (note.frequency() / target.frequency()).log2();
-
-    // One character represents 10 cents, max 5 characters
-    let n = (cents.abs() / 10.0).round() as usize;
-    let n = n.min(5);
-
-    let mut spans = Vec::new();
-    if cents.abs() < 1.0 {
-        spans.push(Span::raw("["));
-        spans.push(name.to_string().green());
-        spans.push(Span::raw("]"));
-    } else if cents > 0.0 {
-        spans.push(Span::raw(" ".repeat(n)));
-        spans.push(name.to_string().blue());
-        spans.push(Span::styled(".".repeat(n), Color::Green));
-    } else {
-        spans.push(Span::styled(".".repeat(n), Color::Red));
-        spans.push(name.to_string().blue());
-        spans.push(Span::raw(" ".repeat(n)));
-    };
-
-    let text = vec![Line::from(spans)];
 
     let cents = cents.clamp(-50.0, 50.0);
     let ratio = ((cents + 50.0) / 100.0).clamp(0.0, 1.0);
@@ -227,55 +190,70 @@ pub fn draw_note(
         .label(Line::from(label).italic())
         .ratio(ratio);
 
-    let gauge_area = frame.area().inner(Margin {
+    let area = frame.area().inner(Margin {
         horizontal: frame.area().width / 5,
         vertical: 0,
     });
+    frame.render_widget(gauge, area);
 
-    frame.render_widget(gauge, gauge_area);
+    if let Some(note_name) = note.name() {
+        let mut area = area;
+        area.x = area.right() + 1;
+        frame.render_widget(note_name.bold(), area);
+    }
+}
 
-    frame.render_widget(name.bold(), {
-        let mut area = gauge_area;
-        area.x = gauge_area.right() + 1;
-        area
-    });
+pub fn draw_note_name<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+    let Some((note, cents)) = state.get_current_note() else {
+        return;
+    };
 
+    let Some(note_name) = note.name() else {
+        return;
+    };
+
+    // One character represents 10 cents, max 5 characters
+    let padding = (cents.abs() / 10.0).round() as usize;
+    let padding = padding.min(5);
+    let mut spans = Vec::new();
+    if cents.abs() < 1.0 {
+        spans.push(Span::raw("["));
+        spans.push(note_name.to_string().green());
+        spans.push(Span::raw("]"));
+    } else if cents > 0.0 {
+        spans.push(Span::raw(" ".repeat(padding)));
+        spans.push(note_name.to_string().blue());
+        spans.push(Span::styled(".".repeat(padding), Color::Green));
+    } else {
+        spans.push(Span::styled(".".repeat(padding), Color::Red));
+        spans.push(note_name.to_string().blue());
+        spans.push(Span::raw(" ".repeat(padding)));
+    };
+
+    let text = vec![Line::from(spans)];
     let area = frame.area().offset(Offset {
         x: 0,
-        y: (frame.area().height / 2).saturating_sub(y_offset) as i32,
+        y: (frame.area().height / 2).saturating_sub(state.bottom_padding) as i32,
     });
-    if let Some(pixel_size) = pixel_size {
-        let big_text = BigText::builder()
-            .pixel_size(pixel_size)
-            .style(Color::Blue)
-            .lines(text)
-            .alignment(Alignment::Center)
-            .build();
+    let big_text = BigText::builder()
+        .pixel_size(state.text_size)
+        .style(Color::Blue)
+        .lines(text)
+        .alignment(Alignment::Center)
+        .build();
+    frame.render_widget(big_text, area);
 
-        frame.render_widget(big_text, area);
-
-        let freq_text = format!("{:.2} Hz", note.frequency());
-        let freq_line =
-            Line::styled(&freq_text, Style::new().bold().white()).alignment(Alignment::Center);
-        let text_area = area
-            .offset(Offset {
-                x: 0,
-                y: y_offset as i32 + 2,
-            })
-            .inner(Margin {
-                horizontal: area.width.saturating_sub(freq_text.len() as u16) / 2,
-                vertical: 0,
-            });
-        frame.render_widget(freq_line, text_area);
-    }
-
-    if fretboard {
-        let mut area = area.offset(Offset {
-            x: (frame.area().width as i32 - 51) / 2,
-            y: y_offset as i32 + 4,
+    let freq_text = format!("{:.2} Hz", note.frequency());
+    let freq_line =
+        Line::styled(&freq_text, Style::new().bold().white()).alignment(Alignment::Center);
+    let text_area = area
+        .offset(Offset {
+            x: 0,
+            y: state.bottom_padding as i32 + 2,
+        })
+        .inner(Margin {
+            horizontal: area.width.saturating_sub(freq_text.len() as u16) / 2,
+            vertical: 0,
         });
-        area.width = 51;
-
-        draw_fretboard(frame, note.frequency(), area, 12);
-    }
+    frame.render_widget(freq_line, text_area);
 }
