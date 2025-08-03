@@ -23,11 +23,11 @@
 
 **Tuitar** is a terminal-based guitar training tool that also lives in your pocket.
 
-Current features include:
+It currently supports real-time visualization of:
 
-- **Real-time pitch visualization**: can be used for tuning.
-- **Waveform/frequency/gain display**: see the sound as it moves.
-- **Fretboard visualization**: get instant feedback on detected notes, mapped to the guitar neck.
+- **Pitch** – Perfect for tuning and identifying notes.
+- **Waveform, frequency & gain** – Watch the sound as it moves.
+- **Fretboard** – See detected notes mapped directly onto the guitar neck for instant feedback.
 
 Also runs standalone on ESP32 hardware.
 
