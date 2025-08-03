@@ -2,7 +2,7 @@
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-dark.png#gh-dark-mode-only" width="400"></a>
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-light.png#gh-light-mode-only" width="400"></a>
     <br>
-    <b>"Learning how to play guitar with a TUI - hence _Tuitar_."</b>
+    <b>"Learning how to play guitar with a TUI - hence <em>Tuitar<em>."</b>
     <br>
     <br>
     <a href="https://github.com/orhun/tuitar/releases">
@@ -25,9 +25,9 @@
 
 Current features include:
 
-- Real-time pitch visualization: can be used for tuning.
-- Waveform and frequency display: see the sound as it moves.
-- Fretboard visualization: get instant feedback on detected notes, mapped to the guitar neck.
+- **Real-time pitch visualization**: can be used for tuning.
+- **Waveform/frequency/gain display**: see the sound as it moves.
+- **Fretboard visualization**: get instant feedback on detected notes, mapped to the guitar neck.
 
 Also runs standalone on ESP32 hardware.
 
