@@ -2,7 +2,7 @@
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-dark.png#gh-dark-mode-only" width="400"></a>
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-light.png#gh-light-mode-only" width="400"></a>
     <br>
-    <em>"Learning how to play guitar with a TUI - hence _Tuitar_."</em>
+    <b>"Learning how to play guitar with a TUI - hence _Tuitar_."</b>
     <br>
     <br>
     <a href="https://github.com/orhun/tuitar/releases">
@@ -20,6 +20,16 @@
 </p>
 
 ---
+
+**Tuitar** is a terminal-based guitar training tool that also lives in your pocket.
+
+Current features include:
+
+- Real-time pitch visualization: can be used for tuning.
+- Waveform and frequency display: see the sound as it moves.
+- Fretboard visualization: get instant feedback on detected notes, mapped to the guitar neck.
+
+Also runs standalone on ESP32 hardware.
 
 > [!NOTE]
 > Building all of this [on livestream](https://www.youtube.com/@orhundev/streams).
