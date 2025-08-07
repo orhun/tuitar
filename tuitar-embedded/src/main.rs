@@ -69,7 +69,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut display = ST7735::new(spi, dc, rst, rgb, inverted, width, height);
 
     display.init(&mut delay).unwrap();
-    display.set_orientation(&Orientation::Landscape).unwrap();
+    display
+        .set_orientation(&Orientation::LandscapeSwapped)
+        .unwrap();
 
     let mut button1 = PinDriver::input(peripherals.pins.gpio22).unwrap();
     button1.set_interrupt_type(InterruptType::NegEdge).unwrap();
