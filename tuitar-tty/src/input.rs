@@ -28,7 +28,7 @@ impl Recorder {
             .with_max_sample_rate()
             .config();
 
-        println!("Using config: {:?}", supported_config,);
+        println!("Using config: {supported_config:?}");
 
         let stream = device
             .build_input_stream(
