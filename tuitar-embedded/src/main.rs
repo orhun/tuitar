@@ -141,7 +141,6 @@ fn main() -> anyhow::Result<()> {
                 1 => jack_adc_channel.read().unwrap_or(0),
                 _ => mic_adc_channel.read().unwrap_or(0),
             };
-            // samples.push(raw_sample as i16);
             samples[sample_len] = raw_sample as i16;
             sample_len += 1;
         }
