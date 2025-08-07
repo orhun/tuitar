@@ -142,18 +142,20 @@ pub fn draw_frequency_chart<T: Transformer>(frame: &mut Frame<'_>, state: &State
 }
 
 pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
-    let Some((note, _)) = state.get_current_note() else {
-        return;
-    };
     let fretboard = Fretboard::default()
         .with_frets(0..=state.fret_count)
         .with_active_note_symbol('⬤')
         .with_active_note_style(Color::Yellow.into());
-    let mut state = FretboardState::default();
-    if let Ok(note) = note.try_into() {
-        state.set_active_note(note);
+
+    let mut fretboard_state = FretboardState::default();
+    if let Some(note) = state
+        .get_current_note()
+        .and_then(|(note, _)| note.try_into().ok())
+    {
+        fretboard_state.set_active_note(note);
     }
-    frame.render_stateful_widget(fretboard, area, &mut state);
+
+    frame.render_stateful_widget(fretboard, area, &mut fretboard_state);
 }
 
 pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
