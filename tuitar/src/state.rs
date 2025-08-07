@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::str::FromStr;
 
 use pitchy::Note;
@@ -34,15 +34,21 @@ pub struct State<T: Transformer> {
 }
 
 impl<T: Transformer> State<T> {
-    pub fn new(transform: T, fret_count: u8, text_size: PixelSize, bottom_padding: u16) -> Self {
+    pub fn new(
+        transform: T,
+        buffer_size: usize,
+        fret_count: u8,
+        text_size: PixelSize,
+        bottom_padding: u16,
+    ) -> Self {
         Self {
             transform,
-            samples: Vec::new(),
+            samples: Vec::with_capacity(buffer_size).into(),
             sample_rate: 0.0,
             fret_count,
             text_size,
             bottom_padding,
-            note_history: VecDeque::new(),
+            note_history: VecDeque::with_capacity(MAX_HISTORY),
         }
     }
 
@@ -59,32 +65,36 @@ impl<T: Transformer> State<T> {
             }
         }
 
-        log::info!(
-            "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
-            samples.len(),
-            sample_rate,
-            fundamental_frequency
-        );
+        // log::info!(
+        //     "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
+        //     samples.len(),
+        //     sample_rate,
+        //     fundamental_frequency
+        // );
     }
 
     fn get_most_frequent_note(&self) -> Option<f64> {
-        self.note_history
-            .iter()
-            .map(|f| *f as i32)
-            .fold(HashMap::new(), |mut acc, freq| {
-                *acc.entry(freq).or_insert(0) += 1;
-                acc
-            })
-            .into_iter()
-            .max_by_key(|&(_, count)| count)
-            .map(|(freq_hz, _)| freq_hz as f64)
-            .and_then(|f| {
-                if f > 70.0 && f < 3000.0 {
-                    Some(f)
+        let h = &self.note_history;
+        match h.len() {
+            0 => None,
+            1 => Some(h[0]),
+            2 => {
+                if (h[0] as i32) == (h[1] as i32) {
+                    Some(h[0])
                 } else {
-                    None
+                    // tie-breaker: pick the *newest*
+                    Some(h[1])
                 }
-            })
+            }
+            _ => unreachable!(),
+        }
+        .and_then(|f| {
+            if (70.0..3000.0).contains(&f) {
+                Some(f)
+            } else {
+                None
+            }
+        })
     }
 
     pub fn get_current_note(&self) -> Option<(Note, f64)> {

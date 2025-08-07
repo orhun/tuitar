@@ -20,13 +20,18 @@ pub struct Application {
 impl Application {
     pub fn new() -> Self {
         let transform = Transform::new();
-        let state = State::new(transform, 12, PixelSize::Full, 5);
 
         let (tx, rx) = mpsc::channel::<Vec<i16>>();
-
         let recorder = Recorder::init("pipewire", move |data: &[i16], _| {
             tx.send(data.to_vec()).unwrap();
         });
+        let state = State::new(
+            transform,
+            recorder.sample_rate() as usize,
+            12,
+            PixelSize::Full,
+            5,
+        );
 
         Self {
             is_running: true,
