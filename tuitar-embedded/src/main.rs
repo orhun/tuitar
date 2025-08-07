@@ -49,6 +49,7 @@ pub fn init_display<'a>(
     let dc = PinDriver::output(dc)?;
     let driver_config = Default::default();
     let spi_config = SpiConfig::new().baudrate(40u32.MHz().into());
+    // let spi_config = SpiConfig::new().baudrate(26.MHz().into()).data_mode(embedded_hal::spi::MODE_3);
     let spi = SpiDeviceDriver::new_single(spi, sclk, sdo, sdi, cs, &driver_config, &spi_config)?;
     let rgb = true;
     let inverted = false;
@@ -122,26 +123,30 @@ fn main() -> anyhow::Result<()> {
     let mut pot = init_adc_channel(&adc1_driver, peripherals.pins.gpio39)?;
 
     let buffer_size = 1024;
-    let mut samples = Vec::with_capacity(buffer_size);
+    let mut samples = Box::new([0i16; 1024]);
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = Application::new();
+    let mut app = Application::new(buffer_size);
 
     while app.is_running {
         let instant = Instant::now();
-        while samples.len() < buffer_size {
+        let mut sample_len = 0;
+        while sample_len < buffer_size {
             let raw_sample = match app.input_mode {
                 0 => mic_adc_channel.read().unwrap_or(0),
                 1 => jack_adc_channel.read().unwrap_or(0),
                 _ => mic_adc_channel.read().unwrap_or(0),
             };
-            samples.push(raw_sample as i16);
+            // samples.push(raw_sample as i16);
+            samples[sample_len] = raw_sample as i16;
+            sample_len += 1;
         }
         let elapsed = instant.elapsed();
-        let sample_rate = samples.len() as f64 / elapsed.as_secs_f64();
-        app.state.process_samples(&samples, sample_rate);
+        let sample_rate = sample_len as f64 / elapsed.as_secs_f64();
+        app.state
+            .process_samples(&samples[..sample_len], sample_rate);
         app.control_value = pot.read().unwrap_or(1000);
         terminal.draw(|frame| app.render(frame)).unwrap();
 
@@ -155,7 +160,7 @@ fn main() -> anyhow::Result<()> {
             app.handle_event(Event::SwitchInputMode);
         }
 
-        samples.clear();
+        samples.fill(0);
     }
 
     Ok(())

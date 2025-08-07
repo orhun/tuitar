@@ -20,9 +20,9 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new() -> Self {
+    pub fn new(buffer_size: usize) -> Self {
         let transform = Transform::new();
-        let state = State::new(transform, 6, PixelSize::Quadrant, 2);
+        let state = State::new(transform, buffer_size, 6, PixelSize::Quadrant, 2);
 
         Self {
             is_running: true,
