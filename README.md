@@ -64,3 +64,15 @@ https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0
 - 1 x 1uF capacitor
 - Mono jack
 - A kickass guitar
+
+## Case
+
+The case needs 9 holes:
+
+2 pots
+2 buttons
+1 display
+1 on/off switch
+1 microphone input
+1 jack input
+1 USB connection
