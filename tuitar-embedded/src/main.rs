@@ -58,7 +58,9 @@ pub fn init_display<'a>(
 
     let mut delay = FreeRtos;
     display.init(&mut delay).unwrap();
-    display.set_orientation(&Orientation::Landscape).unwrap();
+    display
+        .set_orientation(&Orientation::LandscapeSwapped)
+        .unwrap();
 
     Ok(display)
 }
