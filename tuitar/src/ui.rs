@@ -169,9 +169,9 @@ pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
     let label = if cents.abs() < 1.0 {
         "✓ in tune".to_string()
     } else if cents > 0.0 {
-        format!("+{:.1}c", cents)
+        format!("+{cents:.1}c")
     } else {
-        format!("{:.1}c", cents)
+        format!("{cents:.1}c")
     };
 
     let (filled_style, unfilled_style) = if cents < 0.0 {
