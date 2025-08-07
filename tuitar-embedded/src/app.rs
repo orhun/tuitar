@@ -34,7 +34,7 @@ impl Application {
     }
 
     pub fn switch_tab(&mut self) {
-        self.tab = (self.tab + 1) % 3;
+        self.tab = (self.tab + 1) % 4;
     }
 
     pub fn switch_input_mode(&mut self) {
