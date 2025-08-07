@@ -65,12 +65,13 @@ impl<T: Transformer> State<T> {
             }
         }
 
-        // log::info!(
-        //     "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
-        //     samples.len(),
-        //     sample_rate,
-        //     fundamental_frequency
-        // );
+        #[cfg(feature = "logging")]
+        log::info!(
+            "Sampled {} samples at {:.2} Hz | Fundamental frequency = {:.2} Hz",
+            samples.len(),
+            sample_rate,
+            fundamental_frequency
+        );
     }
 
     fn get_most_frequent_note(&self) -> Option<f64> {

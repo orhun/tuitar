@@ -6,12 +6,13 @@ edition.workspace = true
 
 [features]
 experimental = ["esp-idf-svc/experimental"]
+logging = ["tuitar/log", "dep:log"]
 
 [dependencies]
 tuitar.workspace = true
 tui-big-text.workspace = true
 pitchy.workspace = true
-log.workspace = true
+log = { workspace = true, optional = true }
 esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
 embedded-graphics = "0.8.1"
 mipidsi = "0.9.0"
