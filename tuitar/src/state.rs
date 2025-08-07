@@ -43,7 +43,7 @@ impl<T: Transformer> State<T> {
     ) -> Self {
         Self {
             transform,
-            samples: Vec::with_capacity(buffer_size).into(),
+            samples: Vec::with_capacity(buffer_size),
             sample_rate: 0.0,
             fret_count,
             text_size,
@@ -99,14 +99,10 @@ impl<T: Transformer> State<T> {
     }
 
     pub fn get_current_note(&self) -> Option<(Note, f64)> {
-        let Some(frequency) = self.get_most_frequent_note() else {
-            return None;
-        };
+        let frequency = self.get_most_frequent_note()?;
 
         let note = Note::new(frequency);
-        let Some(note_name) = note.name() else {
-            return None;
-        };
+        let note_name = note.name()?;
 
         let perfect_note = Note::from_str(&note_name).expect("failed to get perfect note");
 

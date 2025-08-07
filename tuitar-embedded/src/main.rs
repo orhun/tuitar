@@ -30,6 +30,14 @@ use st7735_lcd::{Orientation, ST7735};
 use app::{Application, Event};
 use transform::Transform;
 
+type DisplayResult<'a> = anyhow::Result<
+    ST7735<
+        SpiDeviceDriver<'a, esp_idf_svc::hal::spi::SpiDriver<'a>>,
+        PinDriver<'a, Gpio27, esp_idf_svc::hal::gpio::Output>,
+        PinDriver<'a, Gpio33, esp_idf_svc::hal::gpio::Output>,
+    >,
+>;
+
 pub fn init_display<'a>(
     spi: impl Peripheral<P = impl SpiAnyPins> + 'a,
     sclk: impl Peripheral<P = impl OutputPin + InputPin> + 'a,
@@ -38,13 +46,7 @@ pub fn init_display<'a>(
     cs: Option<impl Peripheral<P = impl OutputPin> + 'a>,
     dc: impl Peripheral<P = Gpio27> + 'a,
     rst: impl Peripheral<P = Gpio33> + 'a,
-) -> anyhow::Result<
-    ST7735<
-        SpiDeviceDriver<'a, esp_idf_svc::hal::spi::SpiDriver<'a>>,
-        PinDriver<'a, Gpio27, esp_idf_svc::hal::gpio::Output>,
-        PinDriver<'a, Gpio33, esp_idf_svc::hal::gpio::Output>,
-    >,
-> {
+) -> DisplayResult<'a> {
     let rst = PinDriver::output(rst)?;
     let dc = PinDriver::output(dc)?;
     let driver_config = Default::default();
