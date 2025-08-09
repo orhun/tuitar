@@ -15,7 +15,12 @@ use tui_big_text::BigText;
 use crate::state::State;
 use crate::transform::Transformer;
 
-pub fn draw_waveform<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>, bounds: (f64, f64)) {
+pub fn draw_waveform<T: Transformer>(
+    frame: &mut Frame<'_>,
+    area: Rect,
+    state: &State<T>,
+    bounds: (f64, f64),
+) {
     let duration = state.samples.len() as f64 / state.sample_rate;
     let data_points: Vec<(f64, f64)> = state
         .samples
@@ -59,10 +64,10 @@ pub fn draw_waveform<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>, bo
 
     let chart = Chart::new(vec![dataset]).x_axis(x_axis).y_axis(y_axis);
 
-    frame.render_widget(chart, frame.area());
+    frame.render_widget(chart, area);
 }
 
-pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
     let data_points = state.transform.fft_data();
 
     let fft_size = data_points.len();
@@ -92,11 +97,11 @@ pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
         .with_bar_style(BarStyle::Braille)
         .with_color_mode(ColorMode::VerticalGradient);
 
-    frame.render_widget(bar_graph, frame.area());
+    frame.render_widget(bar_graph, area);
 }
 
 // TODO: needs fixing
-pub fn draw_frequency_chart<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+pub fn draw_frequency_chart<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
     let fft_data = state.transform.fft_data();
 
     let fft_len = fft_data.len();
@@ -138,7 +143,7 @@ pub fn draw_frequency_chart<T: Transformer>(frame: &mut Frame<'_>, state: &State
         .y_axis(y_axis)
         .block(Block::bordered().title("Frequency Spectrum"));
 
-    frame.render_widget(chart, frame.area());
+    frame.render_widget(chart, area);
 }
 
 pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
@@ -158,7 +163,7 @@ pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
     frame.render_stateful_widget(fretboard, area, &mut fretboard_state);
 }
 
-pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
     let Some((note, cents)) = state.get_current_note() else {
         return;
     };
@@ -192,8 +197,8 @@ pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
         .label(Line::from(label).italic())
         .ratio(ratio);
 
-    let area = frame.area().inner(Margin {
-        horizontal: frame.area().width / 5,
+    let area = area.inner(Margin {
+        horizontal: area.width / 5,
         vertical: 0,
     });
     frame.render_widget(gauge, area);
@@ -205,7 +210,7 @@ pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
     }
 }
 
-pub fn draw_note_name<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
+pub fn draw_note_name<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
     let Some((note, cents)) = state.get_current_note() else {
         return;
     };
@@ -233,9 +238,9 @@ pub fn draw_note_name<T: Transformer>(frame: &mut Frame<'_>, state: &State<T>) {
     };
 
     let text = vec![Line::from(spans)];
-    let area = frame.area().offset(Offset {
+    let area = area.offset(Offset {
         x: 0,
-        y: (frame.area().height / 2).saturating_sub(state.bottom_padding) as i32,
+        y: (area.height / 2).saturating_sub(state.bottom_padding) as i32,
     });
     let big_text = BigText::builder()
         .pixel_size(state.text_size)

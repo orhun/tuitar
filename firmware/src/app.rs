@@ -66,8 +66,8 @@ impl Application {
         }
 
         if self.tab != 3 {
-            draw_cents(frame, &self.state);
-            draw_note_name(frame, &self.state);
+            draw_cents(frame, area, &self.state);
+            draw_note_name(frame, area, &self.state);
         }
 
         let input_mode_letter = match self.input_mode {

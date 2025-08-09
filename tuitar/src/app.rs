@@ -61,15 +61,16 @@ impl Application {
     }
 
     pub fn render(&mut self, frame: &mut ratatui::Frame<'_>) {
+        let area = frame.area();
         match self.tab {
-            0 => draw_waveform(frame, &self.state, (i16::MIN as f64, i16::MAX as f64)),
-            1 => draw_frequency(frame, &self.state),
-            2 => draw_frequency_chart(frame, &self.state),
+            0 => draw_waveform(frame, area, &self.state, (i16::MIN as f64, i16::MAX as f64)),
+            1 => draw_frequency(frame, area, &self.state),
+            2 => draw_frequency_chart(frame, area, &self.state),
             _ => {}
         }
 
-        draw_cents(frame, &self.state);
-        draw_note_name(frame, &self.state);
+        draw_cents(frame, area, &self.state);
+        draw_note_name(frame, area, &self.state);
 
         let fretboard_width = 51;
         let mut area = frame.area().offset(Offset {
