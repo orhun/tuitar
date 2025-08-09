@@ -1797,7 +1797,7 @@ dependencies = [
 
 [[package]]
 name = "ratatui-fretboard"
-version = "0.1.0"
+version = "0.1.0-rc.0"
 dependencies = [
  "pitchy",
  "ratatui",
@@ -2347,7 +2347,19 @@ dependencies = [
 
 [[package]]
 name = "tuitar"
-version = "0.1.0"
+version = "0.1.0-rc.0"
+dependencies = [
+ "cpal",
+ "pitchy",
+ "ratatui",
+ "rustfft",
+ "tui-big-text",
+ "tuitar-core",
+]
+
+[[package]]
+name = "tuitar-core"
+version = "0.1.0-rc.0"
 dependencies = [
  "colorgrad",
  "log",
@@ -2359,8 +2371,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "tuitar-embedded"
-version = "0.1.0"
+name = "tuitar-firmware"
+version = "0.1.0-rc.0"
 dependencies = [
  "anyhow",
  "embedded-graphics",
@@ -2375,19 +2387,7 @@ dependencies = [
  "pitchy",
  "st7735-lcd",
  "tui-big-text",
- "tuitar",
-]
-
-[[package]]
-name = "tuitar-tty"
-version = "0.1.0"
-dependencies = [
- "cpal",
- "pitchy",
- "ratatui",
- "rustfft",
- "tui-big-text",
- "tuitar",
+ "tuitar-core",
 ]
 
 [[package]]

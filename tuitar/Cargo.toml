@@ -4,14 +4,10 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 
-[features]
-logging = ["log"]
-
 [dependencies]
-colorgrad = "0.7.1"
-pitchy.workspace = true
-ratatui.workspace = true
-tui-bar-graph = "0.1.1"
+tuitar-core.workspace = true
 tui-big-text.workspace = true
-ratatui-fretboard.workspace = true
-log = { workspace = true, optional = true }
+pitchy.workspace = true
+rustfft = "6.3.0"
+cpal = "0.15.3"
+ratatui = { workspace = true, features = ["crossterm"] }

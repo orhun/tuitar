@@ -1,6 +1,6 @@
 use microfft::real;
 use num_complex::Complex32;
-use tuitar::transform::Transformer;
+use tuitar_core::transform::Transformer;
 
 const FFT_SIZE: usize = 1024;
 

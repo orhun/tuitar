@@ -3,8 +3,8 @@ use std::sync::mpsc;
 use ratatui::crossterm::event::{Event, KeyCode};
 use ratatui::layout::Offset;
 use tui_big_text::PixelSize;
-use tuitar::state::State;
-use tuitar::ui::*;
+use tuitar_core::state::State;
+use tuitar_core::ui::*;
 
 use crate::input::Recorder;
 use crate::transform::Transform;

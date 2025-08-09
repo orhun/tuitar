@@ -1,15 +1,15 @@
 [package]
-name = "tuitar-embedded"
+name = "tuitar-firmware"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 
 [features]
 experimental = ["esp-idf-svc/experimental"]
-logging = ["tuitar/log", "dep:log"]
+logging = ["tuitar-core/log", "dep:log"]
 
 [dependencies]
-tuitar.workspace = true
+tuitar-core.workspace = true
 tui-big-text.workspace = true
 pitchy.workspace = true
 log = { workspace = true, optional = true }

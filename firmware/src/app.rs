@@ -3,8 +3,8 @@ use mousefood::{prelude::*, ratatui};
 use tui_big_text::PixelSize;
 
 use crate::Transform;
-use tuitar::state::State;
-use tuitar::ui::*;
+use tuitar_core::state::State;
+use tuitar_core::ui::*;
 
 pub enum Event {
     SwitchTab,

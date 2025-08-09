@@ -1,14 +1,13 @@
 [workspace]
 resolver = "2"
 members = [
-  "tuitar",
-  "tuitar-embedded",
-  "tuitar-tty",
+  "tuitar*",
+  "firmware",
   "ratatui-fretboard",
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.0-rc.0"
 authors = ["Orhun Parmaksız <orhunparmaksiz@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -16,7 +15,7 @@ repository = "https://github.com/orhun/tuitar"
 rust-version = "1.77"
 
 [workspace.dependencies]
-tuitar = { path = "tuitar" }
+tuitar-core = { path = "tuitar-core" }
 ratatui = { version = "0.29.0", default-features = false }
 tui-big-text = "=0.7.0"
 pitchy = "0.1.1"
