@@ -2,7 +2,7 @@ use mousefood::ratatui::layout::Offset;
 use mousefood::{prelude::*, ratatui};
 use tui_big_text::PixelSize;
 
-use crate::Transform;
+use crate::{Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
 use tuitar_core::ui::*;
 
@@ -49,14 +49,15 @@ impl Application {
     }
 
     pub fn render(&mut self, frame: &mut ratatui::Frame<'_>) {
+        let area = frame.area();
         match self.tab {
-            0 => draw_waveform(
-                frame,
-                &self.state,
-                (self.control_value as f64, self.control_value as f64 + 500.),
-            ),
-            1 => draw_frequency(frame, &self.state),
-            2 => draw_frequency_chart(frame, &self.state),
+            0 => {
+                let value = MAX_ADC_VALUE.saturating_sub(self.control_value);
+                let min_bound = (value / 100 * 100) as f64;
+                draw_waveform(frame, area, &self.state, (min_bound, min_bound + 300.))
+            }
+            1 => draw_frequency(frame, area, &self.state),
+            2 => draw_frequency_chart(frame, area, &self.state),
             3 => draw_fretboard(
                 frame,
                 frame.area().offset(Offset { x: 0, y: 3 }),

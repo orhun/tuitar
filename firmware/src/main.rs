@@ -30,6 +30,8 @@ use st7735_lcd::{Orientation, ST7735};
 use app::{Application, Event};
 use transform::Transform;
 
+pub(crate) const MAX_ADC_VALUE: u16 = 3129;
+
 type DisplayResult<'a> = anyhow::Result<
     ST7735<
         SpiDeviceDriver<'a, esp_idf_svc::hal::spi::SpiDriver<'a>>,
@@ -148,7 +150,7 @@ fn main() -> anyhow::Result<()> {
         let sample_rate = sample_len as f64 / elapsed.as_secs_f64();
         app.state
             .process_samples(&samples[..sample_len], sample_rate);
-        app.control_value = pot.read().unwrap_or(1000);
+        app.control_value = pot.read().unwrap_or_default();
         terminal.draw(|frame| app.render(frame)).unwrap();
 
         if button1.is_low() {
