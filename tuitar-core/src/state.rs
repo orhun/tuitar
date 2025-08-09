@@ -52,13 +52,23 @@ impl<T: Transformer> State<T> {
         }
     }
 
+    /// Calculates the root mean square (RMS) of the audio samples.
+    fn rms(&self) -> f64 {
+        if self.samples.is_empty() {
+            return 0.0;
+        }
+        let s: f64 = self.samples.iter().map(|&x| (x as f64) * (x as f64)).sum();
+        (s / self.samples.len() as f64).sqrt() / (i16::MAX as f64)
+    }
+
     pub fn process_samples(&mut self, samples: &[i16], sample_rate: f64) {
         self.samples = samples.to_vec();
         self.transform.process(samples);
         self.sample_rate = sample_rate;
         let fundamental_frequency = self.transform.find_fundamental_frequency(sample_rate);
 
-        if Note::new(fundamental_frequency).name().is_some() {
+        let is_loud_enough = self.rms() > 0.05; // tune threshold
+        if is_loud_enough && Note::new(fundamental_frequency).name().is_some() {
             self.note_history.push_back(fundamental_frequency);
             if self.note_history.len() > MAX_HISTORY {
                 self.note_history.pop_front();
