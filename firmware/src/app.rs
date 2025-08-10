@@ -1,8 +1,8 @@
 use std::time::Instant;
 
+use mousefood::prelude::*;
 use mousefood::ratatui::layout::Offset;
 use mousefood::ratatui::widgets::Paragraph;
-use mousefood::{prelude::*, ratatui};
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
 
@@ -73,36 +73,37 @@ impl Application {
         }
     }
 
-    pub fn render(&mut self, frame: &mut ratatui::Frame<'_>) {
-        if self.splash_timestamp.elapsed().as_secs() < 1 {
-            let area = frame.area();
-            let logo = Paragraph::new(LOGO_ASCII).style(Color::Red);
-            frame.render_widget(logo, area);
+    fn render_splash(&mut self, frame: &mut Frame<'_>) {
+        let area = frame.area();
+        let logo = Paragraph::new(LOGO_ASCII).style(Color::Red);
+        frame.render_widget(logo, area);
 
-            frame.render_widget(
-                Paragraph::new("━━━━━━━┫ Tuitar v0 ┣━━━━━━━")
-                    .alignment(Alignment::Center)
-                    .style(Color::White),
-                // One line above the bottom of the screen
-                Rect::new(area.left(), area.bottom().saturating_sub(1), area.width, 1),
-            );
-            return;
-        }
+        frame.render_widget(
+            Paragraph::new("━━━━━━━┫ Tuitar v0 ┣━━━━━━━")
+                .alignment(Alignment::Center)
+                .style(Color::White),
+            // One line above the bottom of the screen
+            Rect::new(area.left(), area.bottom().saturating_sub(1), area.width, 1),
+        );
+    }
 
+    fn render_fps(&mut self, frame: &mut Frame<'_>) {
         self.fps_widget.fps.tick();
-        let frame_area = frame.area();
+        let area = frame.area();
 
         frame.render_widget(
             &self.fps_widget,
-            // Bottom left corner of the screen
+            // Bottom right corner of the screen
             Rect::new(
-                frame_area.right().saturating_sub(3),
-                frame_area.bottom().saturating_sub(1),
-                frame_area.width,
+                area.right().saturating_sub(3),
+                area.bottom().saturating_sub(1),
+                3,
                 1,
             ),
         );
+    }
 
+    fn render_input_mode(&mut self, frame: &mut Frame<'_>) {
         frame.render_widget(
             Line::from(vec![
                 "[".gray(),
@@ -115,20 +116,23 @@ impl Application {
             ]),
             // Bottom right corner of the screen
             Rect::new(
-                frame_area.left().saturating_sub(3),
-                frame_area.bottom().saturating_sub(1),
-                frame_area.width,
+                frame.area().left().saturating_sub(3),
+                frame.area().bottom().saturating_sub(1),
+                3,
                 1,
             ),
         );
+    }
+
+    fn render_menus(&mut self, frame: &mut Frame<'_>) {
+        let frame_area = frame.area();
+        draw_cents(frame, frame_area, &self.state);
 
         // Move the area up by one line to make space for the bottom area
         let area = frame_area.inner(Margin {
             horizontal: 0,
             vertical: 1,
         });
-
-        draw_cents(frame, frame_area, &self.state);
 
         match self.tab {
             0 => {
@@ -143,7 +147,7 @@ impl Application {
                     area,
                     &self.state,
                     (min_bound, min_bound + 300.),
-                    ("Amp", "t"),
+                    ("Amp", "Time"),
                 )
             }
             2 => draw_dbfs_spectrum(frame, area, &self.state, ("dBFS", "Hz")),
@@ -154,5 +158,35 @@ impl Application {
             ),
             _ => {}
         }
+
+        let menu_name = match self.tab {
+            0 => "Frequency",
+            1 => "Waveform",
+            2 => "Spectrum",
+            3 => "Fretboard",
+            _ => "Unknown",
+        };
+
+        frame.render_widget(
+            Paragraph::new(menu_name).alignment(Alignment::Center),
+            // One line above the bottom of the screen
+            Rect::new(
+                frame_area.left(),
+                frame_area.bottom().saturating_sub(1),
+                frame_area.width,
+                1,
+            ),
+        )
+    }
+
+    pub fn render(&mut self, frame: &mut Frame<'_>) {
+        if self.splash_timestamp.elapsed().as_secs() < 1 {
+            self.render_splash(frame);
+            return;
+        }
+
+        self.render_menus(frame);
+        self.render_fps(frame);
+        self.render_input_mode(frame);
     }
 }
