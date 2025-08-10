@@ -1,4 +1,7 @@
+use std::time::Instant;
+
 use mousefood::ratatui::layout::Offset;
+use mousefood::ratatui::widgets::Paragraph;
 use mousefood::{prelude::*, ratatui};
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
@@ -6,6 +9,19 @@ use tuitar_core::fps::FpsWidget;
 use crate::{Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
 use tuitar_core::ui::*;
+
+const LOGO_ASCII: &str = r#"
+              ████  █████    
+       █████  ████  █████    
+       ████    ██     ██     
+         ██████████████████  
+███████████████████████████  
+███████████████████████████  
+████████████████   ███████   
+██████             ██████    
+                   █████     
+                    ███      
+"#;
 
 pub enum Event {
     SwitchTab,
@@ -18,6 +34,7 @@ pub struct Application {
     pub input_mode: usize,
     pub control_value: u16,
     pub fps_widget: FpsWidget,
+    pub splash_timestamp: Instant,
     tab: usize,
 }
 
@@ -36,6 +53,7 @@ impl Application {
                     .fg(Color::Gray)
                     .add_modifier(Modifier::ITALIC),
             ),
+            splash_timestamp: Instant::now(),
             tab: 0,
         }
     }
@@ -56,6 +74,21 @@ impl Application {
     }
 
     pub fn render(&mut self, frame: &mut ratatui::Frame<'_>) {
+        if self.splash_timestamp.elapsed().as_secs() < 1 {
+            let area = frame.area();
+            let logo = Paragraph::new(LOGO_ASCII).style(Color::Red);
+            frame.render_widget(logo, area);
+
+            frame.render_widget(
+                Paragraph::new("━━━━━━━┫ Tuitar v0 ┣━━━━━━━")
+                    .alignment(Alignment::Center)
+                    .style(Color::White),
+                // One line above the bottom of the screen
+                Rect::new(area.left(), area.bottom().saturating_sub(1), area.width, 1),
+            );
+            return;
+        }
+
         self.fps_widget.fps.tick();
         let frame_area = frame.area();
 
