@@ -98,7 +98,7 @@ pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
         .collect();
 
     let bar_graph = BarGraph::new(scaled_points)
-        .with_gradient(colorgrad::preset::sinebow())
+        .with_gradient(colorgrad::preset::rainbow())
         .with_bar_style(BarStyle::Braille)
         .with_color_mode(ColorMode::VerticalGradient);
 
