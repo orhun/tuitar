@@ -6,7 +6,15 @@ use tui_big_text::PixelSize;
 
 use crate::transform::Transformer;
 
-const MAX_HISTORY: usize = 2;
+const MAX_HISTORY: usize = 3;
+const MIN_FREQ_HZ: f64 = 80.0;
+const MAX_FREQ_HZ: f64 = 1320.0;
+
+#[derive(Debug, Clone)]
+struct NoteHistory {
+    name: String,
+    fundamental_frequency: f64,
+}
 
 /// The application state.
 pub struct State<T: Transformer> {
@@ -30,7 +38,7 @@ pub struct State<T: Transformer> {
     pub bottom_padding: u16,
 
     /// A history of recent notes.
-    note_history: VecDeque<f64>,
+    note_history: VecDeque<NoteHistory>,
 }
 
 impl<T: Transformer> State<T> {
@@ -58,8 +66,22 @@ impl<T: Transformer> State<T> {
         self.sample_rate = sample_rate;
         let fundamental_frequency = self.transform.find_fundamental_frequency(sample_rate);
 
-        if Note::new(fundamental_frequency).name().is_some() {
-            self.note_history.push_back(fundamental_frequency);
+        if fundamental_frequency < MIN_FREQ_HZ || fundamental_frequency > MAX_FREQ_HZ {
+            #[cfg(feature = "logging")]
+            log::warn!(
+                "Fundamental frequency out of range: {:.2} Hz (expected between {:.2} and {:.2} Hz)",
+                fundamental_frequency,
+                MIN_FREQ_HZ,
+                MAX_FREQ_HZ
+            );
+            return;
+        }
+
+        if let Some(name) = Note::new(fundamental_frequency).name() {
+            self.note_history.push_back(NoteHistory {
+                name,
+                fundamental_frequency,
+            });
             if self.note_history.len() > MAX_HISTORY {
                 self.note_history.pop_front();
             }
@@ -74,28 +96,19 @@ impl<T: Transformer> State<T> {
         );
     }
 
+    /// Returns the last note if all notes in the history are the same.
     fn get_most_frequent_note(&self) -> Option<f64> {
         let h = &self.note_history;
-        match h.len() {
-            0 => None,
-            1 => Some(h[0]),
-            2 => {
-                if (h[0] as i32) == (h[1] as i32) {
-                    Some(h[0])
-                } else {
-                    // tie-breaker: pick the *newest*
-                    Some(h[1])
-                }
-            }
-            _ => unreachable!(),
+        if h.is_empty() {
+            return None;
         }
-        .and_then(|f| {
-            if (70.0..3000.0).contains(&f) {
-                Some(f)
-            } else {
-                None
-            }
-        })
+
+        let first_name = &h[0].name;
+        if h.iter().all(|e| e.name == *first_name) {
+            Some(h.into_iter().last()?.fundamental_frequency)
+        } else {
+            None
+        }
     }
 
     pub fn get_current_note(&self) -> Option<(Note, f64)> {
