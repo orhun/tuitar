@@ -93,13 +93,24 @@ impl Application {
             vertical: 1,
         });
 
+        draw_cents(frame, frame_area, &self.state);
+
         match self.tab {
             0 => {
+                draw_frequency(frame, area, &self.state);
+                draw_note_name(frame, area, &self.state);
+            }
+            1 => {
                 let value = MAX_ADC_VALUE.saturating_sub(self.control_value);
                 let min_bound = (value / 100 * 100) as f64;
-                draw_waveform(frame, area, &self.state, (min_bound, min_bound + 300.))
+                draw_waveform(
+                    frame,
+                    area,
+                    &self.state,
+                    (min_bound, min_bound + 300.),
+                    ("amp", "t"),
+                )
             }
-            1 => draw_frequency(frame, area, &self.state),
             2 => draw_frequency_chart(frame, area, &self.state),
             3 => draw_fretboard(
                 frame,
@@ -107,11 +118,6 @@ impl Application {
                 &self.state,
             ),
             _ => {}
-        }
-
-        if self.tab != 3 {
-            draw_cents(frame, frame_area, &self.state);
-            draw_note_name(frame, area, &self.state);
         }
     }
 }

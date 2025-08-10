@@ -20,6 +20,7 @@ pub fn draw_waveform<T: Transformer>(
     area: Rect,
     state: &State<T>,
     bounds: (f64, f64),
+    titles: (&'static str, &'static str),
 ) {
     let duration = state.samples.len() as f64 / state.sample_rate;
     let data_points: Vec<(f64, f64)> = state
@@ -34,25 +35,29 @@ pub fn draw_waveform<T: Transformer>(
 
     let label_count = 5;
     let x_labels: Vec<String> = (0..label_count)
-        .map(|i| format!("{:.2}", i as f64 * duration / (label_count - 1) as f64))
+        .map(|i| {
+            format!("{:.2}", i as f64 * duration / (label_count - 1) as f64)
+                .trim_start_matches("0")
+                .to_string()
+        })
         .collect();
 
     let x_axis = Axis::default()
-        .title("Time(s)".red())
+        .title(titles.1.red())
         .style(Style::default().white())
         .bounds([0.0, duration])
         .labels(x_labels);
 
     let y_axis = Axis::default()
-        .title("Amplitude".red())
+        .title(titles.0.red())
         .style(Style::default().white())
         .bounds([bounds.0, bounds.1])
         .labels(vec![
-            format!("{:.0}", bounds.0),
-            format!("{:.0}", bounds.0 + (bounds.1 - bounds.0) * 0.25),
-            format!("{:.0}", bounds.0 + (bounds.1 - bounds.0) * 0.5),
-            format!("{:.0}", bounds.0 + (bounds.1 - bounds.0) * 0.75),
-            format!("{:.0}", bounds.1),
+            format!("{:.1}", bounds.0 / 1000.0),
+            format!("{:.1}", (bounds.0 + (bounds.1 - bounds.0) * 0.25) / 1000.0),
+            format!("{:.1}", (bounds.0 + (bounds.1 - bounds.0) * 0.5) / 1000.0),
+            format!("{:.1}", (bounds.0 + (bounds.1 - bounds.0) * 0.75) / 1000.0),
+            format!("{:.1}", bounds.1 / 1000.0),
         ]);
 
     let dataset = Dataset::default()
@@ -93,7 +98,7 @@ pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
         .collect();
 
     let bar_graph = BarGraph::new(scaled_points)
-        .with_gradient(colorgrad::preset::rainbow())
+        .with_gradient(colorgrad::preset::reds())
         .with_bar_style(BarStyle::Braille)
         .with_color_mode(ColorMode::VerticalGradient);
 

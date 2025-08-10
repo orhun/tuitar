@@ -1,7 +1,7 @@
 use std::sync::mpsc;
 
 use ratatui::crossterm::event::{Event, KeyCode};
-use ratatui::layout::Offset;
+use ratatui::layout::{Margin, Offset};
 use ratatui::style::Modifier;
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
@@ -73,10 +73,19 @@ impl Application {
         draw_cents(frame, area, &self.state);
         frame.render_widget(&self.fps_widget, frame.area());
 
-        let area = area.offset(Offset { x: 0, y: 1 });
+        let area = area.inner(Margin {
+            horizontal: 1,
+            vertical: 0,
+        });
 
         match self.tab {
-            0 => draw_waveform(frame, area, &self.state, (i16::MIN as f64, i16::MAX as f64)),
+            0 => draw_waveform(
+                frame,
+                area,
+                &self.state,
+                (i16::MIN as f64, i16::MAX as f64),
+                ("Amplitudes", "Time(s)"),
+            ),
             1 => draw_frequency(frame, area, &self.state),
             2 => draw_frequency_chart(frame, area, &self.state),
             _ => {}
