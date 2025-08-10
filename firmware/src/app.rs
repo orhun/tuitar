@@ -70,17 +70,19 @@ impl Application {
             ),
         );
 
-        let input_mode_letter = match self.input_mode {
-            0 => "M",
-            1 => "J",
-            _ => "?",
-        };
-
         frame.render_widget(
-            input_mode_letter.red(),
+            Line::from(vec![
+                "[".gray(),
+                match self.input_mode {
+                    0 => "M".red(),
+                    1 => "J".blue(),
+                    _ => "?".gray(),
+                },
+                "]".gray(),
+            ]),
             // Bottom right corner of the screen
             Rect::new(
-                frame_area.left().saturating_sub(1),
+                frame_area.left().saturating_sub(3),
                 frame_area.bottom().saturating_sub(1),
                 frame_area.width,
                 1,
