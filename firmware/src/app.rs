@@ -1,6 +1,7 @@
 use mousefood::ratatui::layout::Offset;
 use mousefood::{prelude::*, ratatui};
 use tui_big_text::PixelSize;
+use tuitar_core::fps::FpsWidget;
 
 use crate::{Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
@@ -16,6 +17,7 @@ pub struct Application {
     pub state: State<Transform>,
     pub input_mode: usize,
     pub control_value: u16,
+    pub fps_widget: FpsWidget,
     tab: usize,
 }
 
@@ -29,6 +31,11 @@ impl Application {
             state,
             input_mode: 0,
             control_value: 0,
+            fps_widget: FpsWidget::default().with_style(
+                Style::default()
+                    .fg(Color::Gray)
+                    .add_modifier(Modifier::ITALIC),
+            ),
             tab: 0,
         }
     }
@@ -49,7 +56,43 @@ impl Application {
     }
 
     pub fn render(&mut self, frame: &mut ratatui::Frame<'_>) {
-        let area = frame.area();
+        self.fps_widget.fps.tick();
+        let frame_area = frame.area();
+
+        frame.render_widget(
+            &self.fps_widget,
+            // Bottom left corner of the screen
+            Rect::new(
+                frame_area.right().saturating_sub(3),
+                frame_area.bottom().saturating_sub(1),
+                frame_area.width,
+                1,
+            ),
+        );
+
+        let input_mode_letter = match self.input_mode {
+            0 => "M",
+            1 => "J",
+            _ => "?",
+        };
+
+        frame.render_widget(
+            input_mode_letter.red(),
+            // Bottom right corner of the screen
+            Rect::new(
+                frame_area.left().saturating_sub(1),
+                frame_area.bottom().saturating_sub(1),
+                frame_area.width,
+                1,
+            ),
+        );
+
+        // Move the area up by one line to make space for the bottom area
+        let area = frame_area.inner(Margin {
+            horizontal: 0,
+            vertical: 1,
+        });
+
         match self.tab {
             0 => {
                 let value = MAX_ADC_VALUE.saturating_sub(self.control_value);
@@ -67,24 +110,8 @@ impl Application {
         }
 
         if self.tab != 3 {
-            draw_cents(frame, area, &self.state);
+            draw_cents(frame, frame_area, &self.state);
             draw_note_name(frame, area, &self.state);
         }
-
-        let input_mode_letter = match self.input_mode {
-            0 => "M",
-            1 => "J",
-            _ => "?",
-        };
-
-        frame.render_widget(
-            input_mode_letter,
-            Rect::new(
-                frame.area().right().saturating_sub(1),
-                frame.area().top().saturating_sub(1),
-                1,
-                1,
-            ),
-        );
     }
 }

@@ -2,7 +2,9 @@ use std::sync::mpsc;
 
 use ratatui::crossterm::event::{Event, KeyCode};
 use ratatui::layout::Offset;
+use ratatui::style::Modifier;
 use tui_big_text::PixelSize;
+use tuitar_core::fps::FpsWidget;
 use tuitar_core::state::State;
 use tuitar_core::ui::*;
 
@@ -14,6 +16,7 @@ pub struct Application {
     pub state: State<Transform>,
     pub receiver: mpsc::Receiver<Vec<i16>>,
     pub recorder: Recorder,
+    pub fps_widget: FpsWidget,
     tab: usize,
 }
 
@@ -38,6 +41,9 @@ impl Application {
             state,
             receiver: rx,
             recorder,
+            fps_widget: FpsWidget::default()
+                .with_label(true)
+                .with_style(Modifier::ITALIC),
             tab: 0,
         }
     }
@@ -61,7 +67,14 @@ impl Application {
     }
 
     pub fn render(&mut self, frame: &mut ratatui::Frame<'_>) {
+        self.fps_widget.fps.tick();
         let area = frame.area();
+
+        draw_cents(frame, area, &self.state);
+        frame.render_widget(&self.fps_widget, frame.area());
+
+        let area = area.offset(Offset { x: 0, y: 1 });
+
         match self.tab {
             0 => draw_waveform(frame, area, &self.state, (i16::MIN as f64, i16::MAX as f64)),
             1 => draw_frequency(frame, area, &self.state),
@@ -69,7 +82,6 @@ impl Application {
             _ => {}
         }
 
-        draw_cents(frame, area, &self.state);
         draw_note_name(frame, area, &self.state);
 
         let fretboard_width = 51;
