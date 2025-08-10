@@ -6,7 +6,7 @@ use tui_big_text::PixelSize;
 
 use crate::transform::Transformer;
 
-const MAX_HISTORY: usize = 3;
+const MAX_HISTORY: usize = 2;
 const MIN_FREQ_HZ: f64 = 80.0;
 const MAX_FREQ_HZ: f64 = 1320.0;
 
