@@ -143,10 +143,10 @@ impl Application {
                     area,
                     &self.state,
                     (min_bound, min_bound + 300.),
-                    ("amp", "t"),
+                    ("Amp", "t"),
                 )
             }
-            2 => draw_frequency_chart(frame, area, &self.state),
+            2 => draw_dbfs_spectrum(frame, area, &self.state, ("dBFS", "Hz")),
             3 => draw_fretboard(
                 frame,
                 frame.area().offset(Offset { x: 0, y: 3 }),

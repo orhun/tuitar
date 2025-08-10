@@ -1,7 +1,7 @@
 use ratatui::layout::{Alignment, Margin, Offset, Rect};
 use ratatui::style::Color;
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, LineGauge};
+use ratatui::widgets::LineGauge;
 use ratatui::Frame;
 use ratatui::{
     style::{Style, Stylize},
@@ -105,49 +105,94 @@ pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
     frame.render_widget(bar_graph, area);
 }
 
-// TODO: needs fixing
-pub fn draw_frequency_chart<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
-    let fft_data = state.transform.fft_data();
+pub fn draw_dbfs_spectrum<T: Transformer>(
+    frame: &mut Frame<'_>,
+    area: Rect,
+    state: &State<T>,
+    title: (&'static str, &'static str),
+) {
+    // FFT mags (linear)
+    let mags = state.transform.fft_data();
+    if mags.is_empty() || state.sample_rate <= 0.0 {
+        return;
+    }
 
-    let fft_len = fft_data.len();
-    let freq_step = state.sample_rate / (2.0 * fft_len as f64); // Nyquist range
+    let fft_size = mags.len();
+    let freq_per_bin = state.sample_rate / fft_size as f64;
 
-    let data_points: Vec<(f64, f64)> = fft_data
+    // Show 20 Hz .. 20 kHz (clamped to Nyquist)
+    // let f_lo = 20.0_f64;
+    // let nyquist = state.sample_rate / 2.0;
+    // let f_hi = nyquist.min(20_000.0);
+    let f_lo = 80.0; // just below low E2
+    let f_hi = 5000.0; // see harmonics but ignore hiss
+
+    if f_hi <= f_lo {
+        return;
+    }
+
+    let start_bin = (f_lo / freq_per_bin).ceil() as usize;
+    let end_bin = ((f_hi / freq_per_bin).floor() as usize).min(fft_size.saturating_sub(1));
+
+    let slice = &mags[start_bin..=end_bin];
+
+    // Reference = frame peak → 0 dB
+    let ref_mag = slice.iter().copied().fold(0.0_f64, f64::max).max(1e-12); // avoid log of 0
+
+    // Convert to dBFS and clamp floor
+    let db_floor = -60.0_f64;
+    let points: Vec<(f64, f64)> = slice
         .iter()
         .enumerate()
-        .map(|(i, &mag)| {
-            let freq = i as f64 * freq_step;
-            let db = 20.0 * mag.max(1e-10).log10(); // avoid log(0)
-            (freq, db)
+        .map(|(i, m)| {
+            let freq = (start_bin + i) as f64 * freq_per_bin;
+            let db = 20.0 * (m / ref_mag).max(1e-12).log10();
+            (freq, db.clamp(db_floor, 0.0))
         })
         .collect();
 
-    let dataset = Dataset::default()
-        .name("Frequency Spectrum")
-        .marker(symbols::Marker::Braille)
-        .graph_type(GraphType::Line)
-        .style(Style::default().cyan())
-        .data(&data_points);
-
-    let x_max = data_points.last().map(|v| v.0).unwrap_or(0.0);
+    // X labels in kHz
+    let x_labels = {
+        let ticks = 4; // start, 1/3, 2/3, end
+        (0..ticks)
+            .map(|i| {
+                let f = f_lo + (f_hi - f_lo) * (i as f64 / (ticks - 1) as f64);
+                if f >= 1000.0 {
+                    format!("{:.1}k", f / 1000.0)
+                } else {
+                    format!("{:.0}", f)
+                }
+            })
+            .collect::<Vec<_>>()
+    };
 
     let x_axis = Axis::default()
-        .title("Frequency (Hz)".red())
+        .title(title.1.red())
         .style(Style::default().white())
-        .bounds([0.0, x_max])
-        .labels(vec!["0", "1k", "5k", "10k", "20k"]);
+        .bounds([f_lo, f_hi])
+        .labels(x_labels);
 
+    // Y labels fixed for dB
     let y_axis = Axis::default()
-        .title("Gain (dB)".red())
+        .title(title.0.red())
         .style(Style::default().white())
-        .bounds([-100.0, 100.0])
-        .labels(vec!["-100", "-50", "0", "50", "100"]);
+        .bounds([db_floor, 0.0])
+        .labels(vec![
+            format!("{:.0}", db_floor),
+            "-40".into(),
+            "-20".into(),
+            "0".into(),
+        ]);
 
-    let chart = Chart::new(vec![dataset])
-        .x_axis(x_axis)
-        .y_axis(y_axis)
-        .block(Block::bordered().title("Frequency Spectrum"));
+    // Line plot (Braille points also fine; pick Line for dB curve)
+    let dataset = Dataset::default()
+        .name("Magnitude (dB)")
+        .graph_type(GraphType::Line)
+        .marker(symbols::Marker::Braille)
+        .style(Style::default().white())
+        .data(&points);
 
+    let chart = Chart::new(vec![dataset]).x_axis(x_axis).y_axis(y_axis);
     frame.render_widget(chart, area);
 }
 

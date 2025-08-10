@@ -87,7 +87,7 @@ impl Application {
                 ("Amplitudes", "Time(s)"),
             ),
             1 => draw_frequency(frame, area, &self.state),
-            2 => draw_frequency_chart(frame, area, &self.state),
+            2 => draw_dbfs_spectrum(frame, area, &self.state, ("Level (dBFS)", "Frequency (Hz)")),
             _ => {}
         }
 
