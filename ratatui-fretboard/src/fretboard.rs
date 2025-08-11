@@ -62,6 +62,8 @@ pub struct Fretboard {
     active_note_style: Style,
     /// The symbol used to represent the active note on the fretboard.
     active_note_symbol: char,
+    /// The style for the active string.
+    active_string_style: Style,
 }
 
 impl Default for Fretboard {
@@ -81,6 +83,7 @@ impl Default for Fretboard {
             note_name_style: Style::default().fg(Color::Green),
             active_note_style: Style::default().fg(Color::Red),
             active_note_symbol: '●',
+            active_string_style: Style::default().fg(Color::Red),
         }
     }
 }
@@ -128,6 +131,12 @@ impl Fretboard {
         self.active_note_symbol = symbol;
         self
     }
+
+    /// Sets the style for the active string.
+    pub fn with_active_string_style(mut self, style: Style) -> Self {
+        self.active_string_style = style;
+        self
+    }
 }
 
 impl StatefulWidget for Fretboard {
@@ -135,7 +144,7 @@ impl StatefulWidget for Fretboard {
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
         let fret_labels: Vec<_> = self.frets.clone().collect();
-        let available_width = area.width as usize - 4;
+        let available_width = area.width as usize;
         let fret_width = available_width / fret_labels.len();
 
         // Draw top border
@@ -144,27 +153,41 @@ impl StatefulWidget for Fretboard {
             let base_note = string_note.clone();
 
             // Draw string name
-            let name = base_note.name();
+            let name = base_note.to_string();
             let mut spans: Vec<Span> = vec![
-                Span::from(format!("{name:<2}")).style(self.note_name_style),
+                Span::from(format!("{name:<3}")).style(self.note_name_style),
                 "║".into(),
             ];
+
+            let string_style = if state.active_notes.contains(&base_note) {
+                self.active_string_style
+            } else {
+                Style::default()
+            };
 
             // Draw fret symbols for each fret
             for (j, fret_num) in fret_labels.iter().enumerate() {
                 let note = base_note.clone() + *fret_num;
 
+                let fret_width = if j == 0 { 1 } else { fret_width };
                 let symbol: Vec<Span> = if state.active_notes.contains(&note) {
                     let fret_width = fret_width.max(1);
                     let left_pad = (fret_width - 1) / 2;
                     let right_pad = fret_width - 1 - left_pad;
                     vec![
-                        "─".repeat(left_pad).into(),
-                        Span::styled(self.active_note_symbol.to_string(), self.active_note_style),
-                        "─".repeat(right_pad).into(),
+                        Span::styled("─".repeat(left_pad), string_style),
+                        if j == 0 {
+                            Span::styled("─", string_style)
+                        } else {
+                            Span::styled(
+                                self.active_note_symbol.to_string(),
+                                self.active_note_style,
+                            )
+                        },
+                        Span::styled("─".repeat(right_pad), string_style),
                     ]
                 } else {
-                    Line::from("─".repeat(fret_width)).spans
+                    vec![Span::styled("─".repeat(fret_width), string_style)]
                 };
 
                 if j == 0 {
@@ -183,8 +206,8 @@ impl StatefulWidget for Fretboard {
 
         // Draw fret number row
         let label_y = area.y + self.string_names.len() as u16;
-        let mut label_line = String::new();
-        for (j, fret_num) in fret_labels.iter().enumerate() {
+        let mut label_line = String::from("   ");
+        for (j, fret_num) in fret_labels.iter().skip(1).enumerate() {
             if j == 0 {
                 label_line.push_str(&format!("{fret_num:>3}"));
             } else {
@@ -210,17 +233,17 @@ mod tests {
             .with_note_name_style(Style::default()),
         Note::A(4),
         Buffer::with_lines([
-            "E ║───┼───┼───┼───┼───┼─●─┼───┼───┼───┼───┼───┼───║",
-            "B ║───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─●─┼───║",
-            "G ║───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║",
-            "D ║───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║",
-            "A ║───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║",
-            "E ║───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║",
-            "  0   1   2   3   4   5   6   7   8   9  10  11  12",
+            "E4 ║─┼───┼───┼───┼───┼─●─┼───┼───┼───┼───┼───┼───║ ",
+            "B3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─●─┼───║ ",
+            "G3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
+            "D3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
+            "A2 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
+            "E2 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
+            "     1   2   3   4   5   6   7   8   9  10  11  12 ",
         ])
     )]
     #[case::narrow_display(
-        Rect::new(0, 0, 40, 13),
+        Rect::new(0, 0, 36, 13),
         Fretboard::default()
             .with_active_note_style(Style::default())
             .with_fret_number_style(Style::default())
@@ -228,19 +251,19 @@ mod tests {
             .with_frets(0..=6),
         Note::F(4),
         Buffer::with_lines([
-            "E ║─────┼──●──┼─────┼─────┼─────┼─────║ ",
-            "B ║─────┼─────┼─────┼─────┼─────┼─────║ ",
-            "G ║─────┼─────┼─────┼─────┼─────┼─────║ ",
-            "D ║─────┼─────┼─────┼─────┼─────┼─────║ ",
-            "A ║─────┼─────┼─────┼─────┼─────┼─────║ ",
-            "E ║─────┼─────┼─────┼─────┼─────┼─────║ ",
-            "  0     1     2     3     4     5     6 ",
-            "                                        ",
-            "                                        ",
-            "                                        ",
-            "                                        ",
-            "                                        ",
-            "                                        ",
+            "E4 ║─┼──●──┼─────┼─────┼─────┼─────║",
+            "B3 ║─┼─────┼─────┼─────┼─────┼─────║",
+            "G3 ║─┼─────┼─────┼─────┼─────┼─────║",
+            "D3 ║─┼─────┼─────┼─────┼─────┼─────║",
+            "A2 ║─┼─────┼─────┼─────┼─────┼─────║",
+            "E2 ║─┼─────┼─────┼─────┼─────┼─────║",
+            "     1     2     3     4     5     6",
+            "                                    ",
+            "                                    ",
+            "                                    ",
+            "                                    ",
+            "                                    ",
+            "                                    ",
         ])
     )]
     #[case::single_string_open_note(
@@ -252,11 +275,12 @@ mod tests {
         }
         .with_active_note_style(Style::default())
         .with_fret_number_style(Style::default())
-        .with_note_name_style(Style::default()),
+        .with_note_name_style(Style::default())
+        .with_active_string_style(Style::default()),
         Note::E(2), // open string
         Buffer::with_lines([
-            "E ║─●──┼────┼────║  ",
-            "  0    1    2    3  ",
+            "E2 ║─┼─────┼─────║  ",
+            "     1     2     3  ",
             "                    ",
         ])
     )]
