@@ -210,7 +210,7 @@ pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
         fretboard_state.set_active_note(note);
     }
 
-    frame.render_stateful_widget(fretboard, area, &mut fretboard_state);
+    frame.render_stateful_widget(&fretboard, area, &mut fretboard_state);
 }
 
 pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {

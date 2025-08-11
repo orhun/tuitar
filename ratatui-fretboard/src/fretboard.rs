@@ -16,7 +16,9 @@ use crate::note::Note;
 #[derive(Default, Clone, Debug)]
 pub struct FretboardState {
     /// The currently active notes on the fretboard.
-    active_notes: Vec<Note>,
+    pub active_notes: Vec<Note>,
+    /// The notes that are being used for tracking.
+    pub ghost_notes: Vec<Note>,
 }
 
 impl FretboardState {
@@ -28,7 +30,13 @@ impl FretboardState {
     }
 
     /// Sets the active note on the fretboard.
+    ///
+    /// If the note is already a ghost note, it will be removed from the ghost notes.
     pub fn set_active_note(&mut self, note: Note) {
+        if let Some(pos) = self.ghost_notes.iter().position(|n| *n == note) {
+            self.ghost_notes.remove(pos);
+        }
+
         if !self.active_notes.contains(&note) {
             self.active_notes.push(note);
         }
@@ -44,6 +52,14 @@ impl FretboardState {
     /// Clears all active notes on the fretboard.
     pub fn clear_active_notes(&mut self) {
         self.active_notes.clear();
+    }
+
+    /// Sets a ghost note on the fretboard, which is a note
+    /// that is not currently active but is being tracked.
+    pub fn set_ghost_note(&mut self, note: Note) {
+        if !self.ghost_notes.contains(&note) {
+            self.ghost_notes.push(note);
+        }
     }
 }
 
@@ -64,6 +80,10 @@ pub struct Fretboard {
     active_note_symbol: char,
     /// The style for the active string.
     active_string_style: Style,
+    /// The style for ghost notes on the fretboard.
+    ghost_note_style: Style,
+    /// The symbol used to represent ghost notes on the fretboard.
+    ghost_note_symbol: char,
 }
 
 impl Default for Fretboard {
@@ -84,6 +104,8 @@ impl Default for Fretboard {
             active_note_style: Style::default().fg(Color::Red),
             active_note_symbol: '●',
             active_string_style: Style::default().fg(Color::Red),
+            ghost_note_style: Style::default().fg(Color::Blue),
+            ghost_note_symbol: '✖',
         }
     }
 }
@@ -137,9 +159,21 @@ impl Fretboard {
         self.active_string_style = style;
         self
     }
+
+    /// Sets the style for ghost notes on the fretboard.
+    pub fn with_ghost_note_style(mut self, style: Style) -> Self {
+        self.ghost_note_style = style;
+        self
+    }
+
+    /// Sets the symbol used to represent ghost notes on the fretboard.
+    pub fn with_ghost_note_symbol(mut self, symbol: char) -> Self {
+        self.ghost_note_symbol = symbol;
+        self
+    }
 }
 
-impl StatefulWidget for Fretboard {
+impl StatefulWidget for &Fretboard {
     type State = FretboardState;
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
@@ -170,7 +204,10 @@ impl StatefulWidget for Fretboard {
                 let note = base_note.clone() + *fret_num;
 
                 let fret_width = if j == 0 { 1 } else { fret_width };
-                let symbol: Vec<Span> = if state.active_notes.contains(&note) {
+                let highlight_active = state.active_notes.contains(&note);
+                let highlight_ghost = state.ghost_notes.contains(&note);
+
+                let symbol: Vec<Span> = if highlight_active || highlight_ghost {
                     let fret_width = fret_width.max(1);
                     let left_pad = (fret_width - 1) / 2;
                     let right_pad = fret_width - 1 - left_pad;
@@ -178,11 +215,15 @@ impl StatefulWidget for Fretboard {
                         Span::styled("─".repeat(left_pad), string_style),
                         if j == 0 {
                             Span::styled("─", string_style)
-                        } else {
+                        } else if highlight_active {
                             Span::styled(
                                 self.active_note_symbol.to_string(),
                                 self.active_note_style,
                             )
+                        } else if highlight_ghost {
+                            Span::styled(self.ghost_note_symbol.to_string(), self.ghost_note_style)
+                        } else {
+                            unreachable!("Unexpected note state")
                         },
                         Span::styled("─".repeat(right_pad), string_style),
                     ]
