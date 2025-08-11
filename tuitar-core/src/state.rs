@@ -66,7 +66,7 @@ impl<T: Transformer> State<T> {
         self.sample_rate = sample_rate;
         let fundamental_frequency = self.transform.find_fundamental_frequency(sample_rate);
 
-        if fundamental_frequency < MIN_FREQ_HZ || fundamental_frequency > MAX_FREQ_HZ {
+        if !(MIN_FREQ_HZ..=MAX_FREQ_HZ).contains(&fundamental_frequency) {
             #[cfg(feature = "logging")]
             log::warn!(
                 "Fundamental frequency out of range: {:.2} Hz (expected between {:.2} and {:.2} Hz)",
@@ -105,7 +105,7 @@ impl<T: Transformer> State<T> {
 
         let first_name = &h[0].name;
         if h.iter().all(|e| e.name == *first_name) {
-            Some(h.into_iter().last()?.fundamental_frequency)
+            Some(h.iter().last()?.fundamental_frequency)
         } else {
             None
         }
