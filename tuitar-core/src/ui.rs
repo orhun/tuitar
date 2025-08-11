@@ -160,7 +160,7 @@ pub fn draw_dbfs_spectrum<T: Transformer>(
                 if f >= 1000.0 {
                     format!("{:.1}k", f / 1000.0)
                 } else {
-                    format!("{:.0}", f)
+                    format!("{f:.0}")
                 }
             })
             .collect::<Vec<_>>()
