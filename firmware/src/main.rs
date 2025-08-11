@@ -1,5 +1,6 @@
 mod app;
 mod transform;
+mod ui;
 
 use std::time::Instant;
 
@@ -27,7 +28,7 @@ use esp_idf_svc::hal::{
 use mousefood::prelude::*;
 use st7735_lcd::{Orientation, ST7735};
 
-use app::{Application, Event};
+use app::{Application, Event, InputMode};
 use transform::Transform;
 
 pub(crate) const MAX_ADC_VALUE: u16 = 3129;
@@ -139,9 +140,8 @@ fn main() -> anyhow::Result<()> {
         let mut sample_len = 0;
         while sample_len < buffer_size {
             let raw_sample = match app.input_mode {
-                0 => mic_adc_channel.read().unwrap_or(0),
-                1 => jack_adc_channel.read().unwrap_or(0),
-                _ => mic_adc_channel.read().unwrap_or(0),
+                InputMode::Mic => mic_adc_channel.read().unwrap_or(0),
+                InputMode::Jack => jack_adc_channel.read().unwrap_or(0),
             };
             samples[sample_len] = raw_sample as i16;
             sample_len += 1;
@@ -150,8 +150,12 @@ fn main() -> anyhow::Result<()> {
         let sample_rate = sample_len as f64 / elapsed.as_secs_f64();
         app.state
             .process_samples(&samples[..sample_len], sample_rate);
-        app.control_value = pot.read().unwrap_or_default();
         terminal.draw(|frame| app.render(frame)).unwrap();
+
+        let control_value = pot.read().unwrap_or_default();
+        if control_value / 100 != app.control_value / 100 {
+            app.handle_event(Event::UpdateControlValue(control_value));
+        }
 
         if button1.is_low() {
             Ets::delay_ms(10);

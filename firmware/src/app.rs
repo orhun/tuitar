@@ -1,41 +1,99 @@
-use std::time::Instant;
+use std::{fmt::Display, time::Instant};
 
 use mousefood::prelude::*;
-use mousefood::ratatui::layout::Offset;
-use mousefood::ratatui::widgets::Paragraph;
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
 
 use crate::{Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
-use tuitar_core::ui::*;
 
-const LOGO_ASCII: &str = r#"
-              ████  █████    
-       █████  ████  █████    
-       ████    ██     ██     
-         ██████████████████  
-███████████████████████████  
-███████████████████████████  
-████████████████   ███████   
-██████             ██████    
-                   █████     
-                    ███      
-"#;
-
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
     SwitchTab,
     SwitchInputMode,
+    UpdateControlValue(u16),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum InputMode {
+    #[default]
+    Mic,
+    Jack,
+}
+
+impl InputMode {
+    pub fn as_line(&self) -> Line {
+        let label = match self {
+            InputMode::Mic => "M".red(),
+            InputMode::Jack => "J".blue(),
+        };
+        Line::from(vec!["[".gray(), label, "]".gray()])
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Tab {
+    #[default]
+    Frequency,
+    Waveform,
+    Spectrum,
+    Fretboard,
+}
+
+impl Display for Tab {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            Tab::Frequency => "Frequency",
+            Tab::Waveform => "Waveform",
+            Tab::Spectrum => "Spectrum",
+            Tab::Fretboard => "Fretboard",
+        };
+        write!(f, "{name}")
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum FretboardMode {
+    #[default]
+    Live,
+    Scale,
+    Exercise,
+    Song,
+}
+
+impl Display for FretboardMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            FretboardMode::Live => "Live",
+            FretboardMode::Scale => "Scale",
+            FretboardMode::Exercise => "Exercise",
+            FretboardMode::Song => "Song",
+        };
+        write!(f, "{name}")
+    }
+}
+
+impl FretboardMode {
+    pub fn as_line(&self) -> Line {
+        let label = match self {
+            FretboardMode::Live => "Live".green(),
+            FretboardMode::Scale => "Scale".yellow(),
+            FretboardMode::Exercise => "Exercise".cyan(),
+            FretboardMode::Song => "Song".red(),
+        };
+        Line::from(vec!["<".gray(), label, ">".gray()])
+    }
 }
 
 pub struct Application {
     pub is_running: bool,
     pub state: State<Transform>,
-    pub input_mode: usize,
+    pub input_mode: InputMode,
     pub control_value: u16,
     pub fps_widget: FpsWidget,
     pub splash_timestamp: Instant,
-    tab: usize,
+    pub tab: Tab,
+    pub fretboard_mode: FretboardMode,
 }
 
 impl Application {
@@ -46,147 +104,57 @@ impl Application {
         Self {
             is_running: true,
             state,
-            input_mode: 0,
-            control_value: 0,
+            input_mode: InputMode::default(),
+            control_value: MAX_ADC_VALUE / 2,
             fps_widget: FpsWidget::default().with_style(
                 Style::default()
                     .fg(Color::Gray)
                     .add_modifier(Modifier::ITALIC),
             ),
             splash_timestamp: Instant::now(),
-            tab: 0,
+            tab: Tab::default(),
+            fretboard_mode: FretboardMode::Live,
         }
     }
 
     pub fn switch_tab(&mut self) {
-        self.tab = (self.tab + 1) % 4;
+        self.tab = match self.tab {
+            Tab::Frequency => Tab::Waveform,
+            Tab::Waveform => Tab::Spectrum,
+            Tab::Spectrum => Tab::Fretboard,
+            Tab::Fretboard => Tab::Frequency,
+        };
     }
 
     pub fn switch_input_mode(&mut self) {
-        self.input_mode = (self.input_mode + 1) % 2;
+        self.input_mode = match self.input_mode {
+            InputMode::Mic => InputMode::Jack,
+            InputMode::Jack => InputMode::Mic,
+        };
     }
 
     pub fn handle_event(&mut self, event: Event) {
         match event {
             Event::SwitchTab => self.switch_tab(),
             Event::SwitchInputMode => self.switch_input_mode(),
-        }
-    }
+            Event::UpdateControlValue(value) => {
+                self.control_value = value;
+                #[cfg(feature = "logging")]
+                log::info!("Control value updated: {value}");
 
-    fn render_splash(&mut self, frame: &mut Frame<'_>) {
-        let area = frame.area();
-        let logo = Paragraph::new(LOGO_ASCII).style(Color::Red);
-        frame.render_widget(logo, area);
-
-        frame.render_widget(
-            Paragraph::new("━━━━━━━┫ Tuitar v0 ┣━━━━━━━")
-                .alignment(Alignment::Center)
-                .style(Color::White),
-            // One line above the bottom of the screen
-            Rect::new(area.left(), area.bottom().saturating_sub(1), area.width, 1),
-        );
-    }
-
-    fn render_fps(&mut self, frame: &mut Frame<'_>) {
-        self.fps_widget.fps.tick();
-        let area = frame.area();
-
-        frame.render_widget(
-            &self.fps_widget,
-            // Bottom right corner of the screen
-            Rect::new(
-                area.right().saturating_sub(3),
-                area.bottom().saturating_sub(1),
-                3,
-                1,
-            ),
-        );
-    }
-
-    fn render_input_mode(&mut self, frame: &mut Frame<'_>) {
-        frame.render_widget(
-            Line::from(vec![
-                "[".gray(),
-                match self.input_mode {
-                    0 => "M".red(),
-                    1 => "J".blue(),
-                    _ => "?".gray(),
-                },
-                "]".gray(),
-            ]),
-            // Bottom right corner of the screen
-            Rect::new(
-                frame.area().left().saturating_sub(3),
-                frame.area().bottom().saturating_sub(1),
-                3,
-                1,
-            ),
-        );
-    }
-
-    fn render_menus(&mut self, frame: &mut Frame<'_>) {
-        let frame_area = frame.area();
-        draw_cents(frame, frame_area, &self.state);
-
-        // Move the area up by one line to make space for the bottom area
-        let area = frame_area.inner(Margin {
-            horizontal: 0,
-            vertical: 1,
-        });
-
-        match self.tab {
-            0 => {
-                draw_frequency(frame, area, &self.state);
-                draw_note_name(frame, area, &self.state);
+                if self.tab == Tab::Fretboard {
+                    let step = MAX_ADC_VALUE / 4;
+                    if value < step {
+                        self.fretboard_mode = FretboardMode::Live;
+                    } else if value < step * 2 {
+                        self.fretboard_mode = FretboardMode::Scale;
+                    } else if value < step * 3 {
+                        self.fretboard_mode = FretboardMode::Exercise;
+                    } else {
+                        self.fretboard_mode = FretboardMode::Song;
+                    }
+                }
             }
-            1 => {
-                let value = MAX_ADC_VALUE.saturating_sub(self.control_value);
-                let min_bound = (value / 100 * 100) as f64;
-                draw_waveform(
-                    frame,
-                    area,
-                    &self.state,
-                    (min_bound, min_bound + 300.),
-                    ("Amp", "Time"),
-                )
-            }
-            2 => draw_dbfs_spectrum(frame, area, &self.state, ("dBFS", "Hz")),
-            3 => draw_fretboard(
-                frame,
-                frame.area().offset(Offset { x: 0, y: 3 }),
-                &self.state,
-            ),
-            _ => {}
         }
-
-        let menu_name = match self.tab {
-            0 => "Frequency",
-            1 => "Waveform",
-            2 => "Spectrum",
-            3 => "Fretboard",
-            _ => "Unknown",
-        };
-
-        frame.render_widget(
-            Paragraph::new(menu_name).alignment(Alignment::Center),
-            // One line above the bottom of the screen
-            Rect::new(
-                frame_area.left(),
-                frame_area.bottom().saturating_sub(1),
-                frame_area.width,
-                1,
-            ),
-        )
-    }
-
-    pub fn render(&mut self, frame: &mut Frame<'_>) {
-        if self.splash_timestamp.elapsed().as_secs() < 1 {
-            self.render_splash(frame);
-            return;
-        }
-
-        self.render_menus(frame);
-        self.render_fps(frame);
-        self.render_input_mode(frame);
     }
 }
