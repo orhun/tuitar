@@ -40,9 +40,3 @@ The dimensions are 100mm x 65mm x 50mm (L x W x H)
 ![](./assets/case-3.jpg)
 
 ![](./assets/case-4.jpg)
-
-## Case Labels
-
-The dimensions are 99mm x 64mm (W x H).
-
-![](./assets/case-labels.jpg)
