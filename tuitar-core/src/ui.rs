@@ -196,13 +196,14 @@ pub fn draw_dbfs_spectrum<T: Transformer>(
     frame.render_widget(chart, area);
 }
 
-pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {
-    let fretboard = Fretboard::default()
-        .with_frets(0..=state.fret_count)
-        .with_active_note_symbol('⬤')
-        .with_active_note_style(Color::Yellow.into());
+pub fn draw_fretboard<T: Transformer>(
+    frame: &mut Frame<'_>,
+    area: Rect,
+    state: &State<T>,
+    fretboard_state: &mut FretboardState,
+) {
+    let fretboard = Fretboard::default().with_frets(0..=state.fret_count);
 
-    let mut fretboard_state = FretboardState::default();
     if let Some(note) = state
         .get_current_note()
         .and_then(|(note, _)| note.try_into().ok())
@@ -210,7 +211,9 @@ pub fn draw_fretboard<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
         fretboard_state.set_active_note(note);
     }
 
-    frame.render_stateful_widget(&fretboard, area, &mut fretboard_state);
+    frame.render_stateful_widget(&fretboard, area, fretboard_state);
+
+    fretboard_state.clear_active_notes();
 }
 
 pub fn draw_cents<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: &State<T>) {

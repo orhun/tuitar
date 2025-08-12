@@ -4,6 +4,16 @@ use std::{fmt, ops::Add};
 
 use crate::error::Error;
 
+/// Represents the standard tuning of a 6-string guitar.
+pub const STANDARD_TUNING: [Note; 6] = [
+    Note::E(2),
+    Note::A(2),
+    Note::D(3),
+    Note::G(3),
+    Note::B(3),
+    Note::E(4),
+];
+
 /// Represents a musical note with its pitch and octave.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Note {

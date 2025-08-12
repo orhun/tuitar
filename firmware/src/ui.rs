@@ -107,6 +107,7 @@ impl Application {
                     frame,
                     frame.area().offset(Offset { x: 0, y: 3 }),
                     &self.state,
+                    &mut self.fretboard_state,
                 );
             }
         }

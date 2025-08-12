@@ -8,6 +8,7 @@ edition.workspace = true
 tuitar-core.workspace = true
 tui-big-text.workspace = true
 pitchy.workspace = true
+ratatui-fretboard.workspace = true
 rustfft = "6.3.0"
 cpal = "0.15.3"
 ratatui = { workspace = true, features = ["crossterm"] }

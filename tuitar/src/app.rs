@@ -3,6 +3,7 @@ use std::sync::mpsc;
 use ratatui::crossterm::event::{Event, KeyCode};
 use ratatui::layout::{Margin, Offset};
 use ratatui::style::Modifier;
+use ratatui_fretboard::FretboardState;
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
 use tuitar_core::state::State;
@@ -99,6 +100,6 @@ impl Application {
             y: (frame.area().height / 2) as i32 + 4,
         });
         area.width = fretboard_width.try_into().unwrap_or(0);
-        draw_fretboard(frame, area, &self.state);
+        draw_fretboard(frame, area, &self.state, &mut FretboardState::default());
     }
 }

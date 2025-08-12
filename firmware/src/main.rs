@@ -1,6 +1,7 @@
 mod app;
 mod transform;
 mod ui;
+mod utils;
 
 use std::time::Instant;
 
@@ -168,6 +169,8 @@ fn main() -> anyhow::Result<()> {
         }
 
         samples.fill(0);
+
+        app.handle_event(Event::Tick);
     }
 
     Ok(())

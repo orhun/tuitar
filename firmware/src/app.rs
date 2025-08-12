@@ -1,14 +1,16 @@
 use std::{fmt::Display, time::Instant};
 
 use mousefood::prelude::*;
+use ratatui_fretboard::FretboardState;
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
 
-use crate::{Transform, MAX_ADC_VALUE};
+use crate::{utils, Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
+    Tick,
     SwitchTab,
     SwitchInputMode,
     UpdateControlValue(u16),
@@ -57,7 +59,7 @@ pub enum FretboardMode {
     #[default]
     Live,
     Scale,
-    Exercise,
+    Random,
     Song,
 }
 
@@ -66,7 +68,7 @@ impl Display for FretboardMode {
         let name = match self {
             FretboardMode::Live => "Live",
             FretboardMode::Scale => "Scale",
-            FretboardMode::Exercise => "Exercise",
+            FretboardMode::Random => "Random",
             FretboardMode::Song => "Song",
         };
         write!(f, "{name}")
@@ -78,7 +80,7 @@ impl FretboardMode {
         let label = match self {
             FretboardMode::Live => "Live".green(),
             FretboardMode::Scale => "Scale".yellow(),
-            FretboardMode::Exercise => "Exercise".cyan(),
+            FretboardMode::Random => "Random".cyan(),
             FretboardMode::Song => "Song".red(),
         };
         Line::from(vec!["<".gray(), label, ">".gray()])
@@ -94,6 +96,7 @@ pub struct Application {
     pub splash_timestamp: Instant,
     pub tab: Tab,
     pub fretboard_mode: FretboardMode,
+    pub fretboard_state: FretboardState,
 }
 
 impl Application {
@@ -114,6 +117,7 @@ impl Application {
             splash_timestamp: Instant::now(),
             tab: Tab::default(),
             fretboard_mode: FretboardMode::Live,
+            fretboard_state: FretboardState::default(),
         }
     }
 
@@ -133,8 +137,37 @@ impl Application {
         };
     }
 
+    pub fn switch_fretboard_mode(&mut self) {
+        let step = MAX_ADC_VALUE / 4;
+
+        self.fretboard_state.clear_ghost_notes();
+
+        if self.control_value < step {
+            self.fretboard_mode = FretboardMode::Live;
+        } else if self.control_value < step * 2 {
+            self.fretboard_mode = FretboardMode::Scale;
+        } else if self.control_value < step * 3 {
+            self.fretboard_mode = FretboardMode::Random;
+        } else {
+            self.fretboard_mode = FretboardMode::Song;
+        }
+    }
+
+    pub fn tick(&mut self) {
+        if self.tab == Tab::Fretboard
+            && self.fretboard_mode == FretboardMode::Random
+            && self.fretboard_state.ghost_notes.is_empty()
+        {
+            self.fretboard_state
+                .set_ghost_note(utils::generate_random_note(0..=self.state.fret_count));
+        }
+    }
+
     pub fn handle_event(&mut self, event: Event) {
         match event {
+            Event::Tick => {
+                self.tick();
+            }
             Event::SwitchTab => self.switch_tab(),
             Event::SwitchInputMode => self.switch_input_mode(),
             Event::UpdateControlValue(value) => {
@@ -143,16 +176,7 @@ impl Application {
                 log::info!("Control value updated: {value}");
 
                 if self.tab == Tab::Fretboard {
-                    let step = MAX_ADC_VALUE / 4;
-                    if value < step {
-                        self.fretboard_mode = FretboardMode::Live;
-                    } else if value < step * 2 {
-                        self.fretboard_mode = FretboardMode::Scale;
-                    } else if value < step * 3 {
-                        self.fretboard_mode = FretboardMode::Exercise;
-                    } else {
-                        self.fretboard_mode = FretboardMode::Song;
-                    }
+                    self.switch_fretboard_mode();
                 }
             }
         }

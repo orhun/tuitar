@@ -10,7 +10,7 @@ use ratatui::{
     widgets::StatefulWidget,
 };
 
-use crate::note::Note;
+use crate::note::{Note, STANDARD_TUNING};
 
 /// State for the fretboard widget.
 #[derive(Default, Clone, Debug)]
@@ -49,17 +49,22 @@ impl FretboardState {
         }
     }
 
-    /// Clears all active notes on the fretboard.
-    pub fn clear_active_notes(&mut self) {
-        self.active_notes.clear();
-    }
-
     /// Sets a ghost note on the fretboard, which is a note
     /// that is not currently active but is being tracked.
     pub fn set_ghost_note(&mut self, note: Note) {
         if !self.ghost_notes.contains(&note) {
             self.ghost_notes.push(note);
         }
+    }
+
+    /// Clears all active notes on the fretboard.
+    pub fn clear_active_notes(&mut self) {
+        self.active_notes.clear();
+    }
+
+    /// Clears all ghost notes on the fretboard.
+    pub fn clear_ghost_notes(&mut self) {
+        self.ghost_notes.clear();
     }
 }
 
@@ -90,20 +95,13 @@ impl Default for Fretboard {
     /// Creates a default `Fretboard` with standard guitar tuning.
     fn default() -> Self {
         Self {
-            string_names: vec![
-                Note::E(2),
-                Note::A(2),
-                Note::D(3),
-                Note::G(3),
-                Note::B(3),
-                Note::E(4),
-            ],
+            string_names: STANDARD_TUNING.to_vec(),
             frets: 0..=12,
             fret_number_style: Style::default().fg(Color::Magenta),
             note_name_style: Style::default().fg(Color::Green),
-            active_note_style: Style::default().fg(Color::Red),
-            active_note_symbol: '●',
-            active_string_style: Style::default().fg(Color::Red),
+            active_note_style: Style::default().fg(Color::Yellow),
+            active_note_symbol: '⬤',
+            active_string_style: Style::default().fg(Color::Yellow),
             ghost_note_style: Style::default().fg(Color::Blue),
             ghost_note_symbol: '✖',
         }
@@ -274,8 +272,8 @@ mod tests {
             .with_note_name_style(Style::default()),
         Note::A(4),
         Buffer::with_lines([
-            "E4 ║─┼───┼───┼───┼───┼─●─┼───┼───┼───┼───┼───┼───║ ",
-            "B3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─●─┼───║ ",
+            "E4 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼───┼───║ ",
+            "B3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─⬤─┼───║ ",
             "G3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
             "D3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
             "A2 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
@@ -292,7 +290,7 @@ mod tests {
             .with_frets(0..=6),
         Note::F(4),
         Buffer::with_lines([
-            "E4 ║─┼──●──┼─────┼─────┼─────┼─────║",
+            "E4 ║─┼──⬤──┼─────┼─────┼─────┼─────║",
             "B3 ║─┼─────┼─────┼─────┼─────┼─────║",
             "G3 ║─┼─────┼─────┼─────┼─────┼─────║",
             "D3 ║─┼─────┼─────┼─────┼─────┼─────║",

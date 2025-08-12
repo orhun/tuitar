@@ -12,6 +12,7 @@ logging = ["tuitar-core/log", "dep:log"]
 tuitar-core.workspace = true
 tui-big-text.workspace = true
 pitchy.workspace = true
+ratatui-fretboard.workspace = true
 log = { workspace = true, optional = true }
 esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
 embedded-graphics = "0.8.1"
@@ -22,6 +23,7 @@ microfft = "0.6.0"
 num-complex = "0.4.6"
 st7735-lcd = "0.10.0"
 anyhow = "1.0.98"
+fastrand = "2.3.0"
 
 [build-dependencies]
 embuild = { version = "0.33", features = ["espidf"] }
