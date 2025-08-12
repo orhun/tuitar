@@ -182,4 +182,4 @@ To make the case look nice, you can print the labels below and stick them on the
 
 The dimensions are 99mm x 64mm (W x H).
 
-<img src="./assets/case-labels.jpg" height="600">
+<img src="./assets/case-labels.jpg" height="400">
