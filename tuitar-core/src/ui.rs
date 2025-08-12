@@ -202,7 +202,7 @@ pub fn draw_fretboard<T: Transformer>(
     state: &State<T>,
     fretboard_state: &mut FretboardState,
 ) {
-    let fretboard = Fretboard::default().with_frets(0..=state.fret_count);
+    let fretboard = Fretboard::default();
 
     if let Some(note) = state
         .get_current_note()

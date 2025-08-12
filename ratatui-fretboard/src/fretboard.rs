@@ -13,20 +13,35 @@ use ratatui::{
 use crate::note::{Note, STANDARD_TUNING};
 
 /// State for the fretboard widget.
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct FretboardState {
     /// The currently active notes on the fretboard.
     pub active_notes: Vec<Note>,
     /// The notes that are being used for tracking.
     pub ghost_notes: Vec<Note>,
+    /// The range of frets to display on the fretboard.
+    pub frets: RangeInclusive<u8>,
+}
+
+impl Default for FretboardState {
+    /// Creates a default `FretboardState` with no active notes and an empty ghost notes list.
+    fn default() -> Self {
+        Self {
+            active_notes: Vec::new(),
+            ghost_notes: Vec::new(),
+            frets: 0..=12,
+        }
+    }
 }
 
 impl FretboardState {
     /// Creates a new `FretboardState` with no active notes.
-    ///
-    /// This is equivalent to `FretboardState::default()`.
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(frets: RangeInclusive<u8>) -> Self {
+        Self {
+            active_notes: Vec::new(),
+            ghost_notes: Vec::new(),
+            frets,
+        }
     }
 
     /// Sets the active note on the fretboard.
@@ -66,6 +81,11 @@ impl FretboardState {
     pub fn clear_ghost_notes(&mut self) {
         self.ghost_notes.clear();
     }
+
+    /// Sets the range of frets to display on the fretboard.
+    pub fn set_frets(&mut self, frets: RangeInclusive<u8>) {
+        self.frets = frets;
+    }
 }
 
 /// Represents a fretboard widget for displaying musical notes
@@ -73,8 +93,6 @@ impl FretboardState {
 pub struct Fretboard {
     /// The names of the strings on the fretboard.
     string_names: Vec<Note>,
-    /// The range of frets to display on the fretboard.
-    frets: RangeInclusive<u8>,
     /// The style for fret numbers.
     fret_number_style: Style,
     /// The style for note names.
@@ -96,7 +114,6 @@ impl Default for Fretboard {
     fn default() -> Self {
         Self {
             string_names: STANDARD_TUNING.to_vec(),
-            frets: 0..=12,
             fret_number_style: Style::default().fg(Color::Magenta),
             note_name_style: Style::default().fg(Color::Green),
             active_note_style: Style::default().fg(Color::Yellow),
@@ -119,12 +136,6 @@ impl Fretboard {
     /// Sets the names of the strings on the fretboard.
     pub fn with_string_names(mut self, string_names: Vec<Note>) -> Self {
         self.string_names = string_names;
-        self
-    }
-
-    /// Sets the range of frets to display on the fretboard.
-    pub fn with_frets(mut self, frets: RangeInclusive<u8>) -> Self {
-        self.frets = frets;
         self
     }
 
@@ -175,7 +186,7 @@ impl StatefulWidget for &Fretboard {
     type State = FretboardState;
 
     fn render(self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
-        let fret_labels: Vec<_> = self.frets.clone().collect();
+        let fret_labels: Vec<_> = state.frets.clone().collect();
         let available_width = area.width as usize;
         let fret_width = available_width / fret_labels.len();
 
@@ -270,7 +281,12 @@ mod tests {
             .with_active_note_style(Style::default())
             .with_fret_number_style(Style::default())
             .with_note_name_style(Style::default()),
-        Note::A(4),
+        FretboardState {
+            active_notes: vec![Note::A(4)],
+            ghost_notes: Vec::new(),
+            frets: 0..=12,
+
+        },
         Buffer::with_lines([
             "E4 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼───┼───║ ",
             "B3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─⬤─┼───║ ",
@@ -286,9 +302,13 @@ mod tests {
         Fretboard::default()
             .with_active_note_style(Style::default())
             .with_fret_number_style(Style::default())
-            .with_note_name_style(Style::default())
-            .with_frets(0..=6),
-        Note::F(4),
+            .with_note_name_style(Style::default()),
+        FretboardState {
+            active_notes: vec![Note::F(4)],
+            ghost_notes: Vec::new(),
+            frets: 0..=6,
+
+        },
         Buffer::with_lines([
             "E4 ║─┼──⬤──┼─────┼─────┼─────┼─────║",
             "B3 ║─┼─────┼─────┼─────┼─────┼─────║",
@@ -309,93 +329,124 @@ mod tests {
         Rect::new(0, 0, 20, 3),
         Fretboard {
             string_names: vec![Note::E(2)],
-            frets: 0..=3,
             ..Fretboard::default()
         }
         .with_active_note_style(Style::default())
         .with_fret_number_style(Style::default())
         .with_note_name_style(Style::default())
         .with_active_string_style(Style::default()),
-        Note::E(2), // open string
+        FretboardState {
+            active_notes: vec![Note::F(2)],
+            ghost_notes: Vec::new(),
+            frets: 0..=3,
+
+        },
         Buffer::with_lines([
-            "E2 ║─┼─────┼─────║  ",
+            "E2 ║─┼──⬤──┼─────║  ",
             "     1     2     3  ",
             "                    ",
         ])
     )]
+    #[case::two_strings_custom_frets(
+        Rect::new(0, 0, 24, 4),
+        Fretboard {
+            string_names: vec![Note::A(2), Note::D(3)],
+            ..Fretboard::default()
+        }
+        .with_active_note_style(Style::default())
+        .with_fret_number_style(Style::default())
+        .with_note_name_style(Style::default()),
+        FretboardState {
+            active_notes: vec![Note::F(3)],
+            ghost_notes: Vec::new(),
+            frets: 2..=5,
+        },
+        Buffer::with_lines([
+            "D3 ║─┼──⬤───┼──────║    ",
+            "A2 ║─┼──────┼──────║    ",
+            "     3      4      5    ",
+            "                        ",
+        ])
+    )]
+    #[case::custom_tuning_bass_style(
+        Rect::new(0, 0, 34, 6),
+        Fretboard {
+            string_names: vec![Note::B(1), Note::E(2), Note::A(2), Note::D(3)],
+            ..Fretboard::default()
+        }
+        .with_active_note_style(Style::default())
+        .with_fret_number_style(Style::default())
+        .with_note_name_style(Style::default()),
+        FretboardState {
+            active_notes: vec![Note::E(3)],
+            ghost_notes: Vec::new(),
+            frets: 0..=4,
+        },
+        Buffer::with_lines([
+            "D3 ║─┼──────┼──⬤───┼──────║       ",
+            "A2 ║─┼──────┼──────┼──────║       ",
+            "E2 ║─┼──────┼──────┼──────║       ",
+            "B1 ║─┼──────┼──────┼──────║       ",
+            "     1      2      3      4       ",
+            "                                  ",
+        ])
+    )]
+    #[case::compact_display_limited_width(
+        Rect::new(0, 0, 26, 6),
+        Fretboard {
+            string_names: vec![Note::E(4), Note::B(3), Note::G(3)],
+            ..Fretboard::default()
+        }
+        .with_active_note_style(Style::default())
+        .with_fret_number_style(Style::default())
+        .with_note_name_style(Style::default()),
+        FretboardState {
+            active_notes: vec![Note::FSharp(4)],
+            ghost_notes: Vec::new(),
+            frets: 0..=3,
+        },
+        Buffer::with_lines([
+            "G3 ║─┼──────┼──────║      ",
+            "B3 ║─┼──────┼──────║      ",
+            "E4 ║─┼──────┼──⬤───║      ",
+            "     1      2      3      ",
+            "                          ",
+            "                          ",
+        ])
+    )]
+    #[case::extremely_long_fretboard(
+        Rect::new(0, 0, 120, 7),
+        Fretboard {
+            string_names: STANDARD_TUNING.to_vec(),
+            ..Fretboard::default()
+        }
+        .with_active_note_style(Style::default())
+        .with_fret_number_style(Style::default())
+        .with_note_name_style(Style::default()),
+        FretboardState {
+            active_notes: vec![Note::FSharp(4), Note::F(3)],
+            ghost_notes: Vec::new(),
+            frets: 0..=20,
+        },
+        Buffer::with_lines([
+            "E4 ║─┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "B3 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "G3 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "D3 ║─┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────║",
+            "A2 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "E2 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20",
+        ])
+    )]
+
     fn render_fretboard(
         #[case] area: Rect,
         #[case] fretboard: Fretboard,
-        #[case] active_note: Note,
+        #[case] mut state: FretboardState,
         #[case] expected: Buffer,
     ) {
         let mut buf = Buffer::empty(area);
-        let mut state = FretboardState::default();
-        state.set_active_note(active_note);
         fretboard.render(area, &mut buf, &mut state);
         assert_eq!(buf, expected);
     }
-
-    // TODO: add more tests for different fretboard configurations
-    //
-    //     #[case::two_strings_custom_frets(
-    //     Rect::new(0, 0, 26, 4),
-    //     Fretboard {
-    //         string_names: vec![Note::A(2), Note::D(3)],
-    //         frets: 2..=5,
-    //         ..Fretboard::default()
-    //     }
-    //     .with_active_note_style(Style::default())
-    //     .with_fret_number_style(Style::default())
-    //     .with_note_name_style(Style::default()),
-    //     Note::B(3), // D string, 4th fret
-    //     Buffer::with_lines([
-    //         "D ║─────┼──●──┼─────┼─────║",
-    //         "A ║─────┼─────┼─────┼─────║",
-    //         "  2     3     4     5     ",
-    //         "                          ",
-    //     ])
-    // )]
-    //
-    // #[case::custom_tuning_bass_style(
-    //     Rect::new(0, 0, 34, 6),
-    //     Fretboard {
-    //         string_names: vec![Note::B(1), Note::E(2), Note::A(2), Note::D(3)],
-    //         frets: 0..=4,
-    //         ..Fretboard::default()
-    //     }
-    //     .with_active_note_style(Style::default())
-    //     .with_fret_number_style(Style::default())
-    //     .with_note_name_style(Style::default()),
-    //     Note::G(3), // D string, fret 2
-    //     Buffer::with_lines([
-    //         "D ║─────┼─────┼──●──┼─────┼─────║",
-    //         "A ║─────┼─────┼─────┼─────┼─────║",
-    //         "E ║─────┼─────┼─────┼─────┼─────║",
-    //         "B ║─────┼─────┼─────┼─────┼─────║",
-    //         "  0     1     2     3     4     ",
-    //         "                                ",
-    //     ])
-    // )]
-    //
-    // #[case::compact_display_limited_width(
-    //     Rect::new(0, 0, 26, 6),
-    //     Fretboard {
-    //         string_names: vec![Note::E(4), Note::B(3), Note::G(3)],
-    //         frets: 0..=3,
-    //         ..Fretboard::default()
-    //     }
-    //     .with_active_note_style(Style::default())
-    //     .with_fret_number_style(Style::default())
-    //     .with_note_name_style(Style::default()),
-    //     Note::G(4), // E string, fret 3
-    //     Buffer::with_lines([
-    //         "E ║─────┼─────┼─────┼──●──║",
-    //         "B ║─────┼─────┼─────┼─────║",
-    //         "G ║─────┼─────┼─────┼─────║",
-    //         "  0     1     2     3     ",
-    //         "                          ",
-    //         "                          ",
-    //     ])
-    // )]
 }
