@@ -88,7 +88,8 @@
 
 6. Place the microphone amplifier (U3) and solder it. You might need to solder the 3-pin header pin first. Make sure the pins align with the PCB holes.
 
-> Note: You might want to keep some space under the mic amp for reaching the gain adjustment potentiometer later.
+> [!WARNING]
+> You might want to keep some space under the mic amp for reaching the gain adjustment potentiometer later.
 
 <img src="./assets/step-6.jpg" height="600">
 
@@ -105,16 +106,17 @@
 
 9. Solder wires to the mono jack (J1) and place it on the PCB.
 
-To find the correct pinout, you can use a multimeter as follows:
-
-- Set the multimeter to continuity mode.
-- Insert a guitar cable (or short wire) into the jack.
-- Touch one probe to the tip of the plug, then:
-  - Touch the other probe to each pin on the jack.
-  - The one that beeps is the Tip → this is the signal pin.
-- Touch the probe to the sleeve (outer metal part) of the plug:
-  - Touch the other probe to the remaining pins.
-  - The one that beeps is the Sleeve → this is the ground.
+> [!IMPORTANT]
+> To find the correct pinout, you can use a multimeter as follows:
+>
+> - Set the multimeter to continuity mode.
+> - Insert a guitar cable (or short wire) into the jack.
+> - Touch one probe to the tip of the plug, then:
+>   - Touch the other probe to each pin on the jack.
+>   - The one that beeps is the Tip → this is the signal pin.
+> - Touch the probe to the sleeve (outer metal part) of the plug:
+>   - Touch the other probe to the remaining pins.
+>   - The one that beeps is the Sleeve → this is the ground.
 
 <img src="./assets/step-9.jpg" height="600">
 
@@ -149,8 +151,8 @@ Carefully place it on the board along with the TFT display. Make sure the displa
 
 <img src="./assets/step-15.jpg" height="600">
 
-> [!NOTE]
-> The USB side of the ESP-WROOM-32D should be facing the edge of the PCB for easy access.
+> [!CAUTION]
+> The USB side of the ESP-WROOM-32D should be facing the edge of the PCB.
 
 If everything goes well, you should see the Tuitar logo on the display and you can start rocking it.
 
