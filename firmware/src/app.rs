@@ -165,9 +165,8 @@ impl Application {
         const MAX_FRET: u8 = 24;
         const WINDOW_SIZE: u8 = 6;
         let max_start_fret = MAX_FRET - WINDOW_SIZE;
-        let start_fret =
-            ((self.control_value as u32 * max_start_fret as u32) / MAX_ADC_VALUE as u32) as u8;
-
+        let start_fret = max_start_fret
+            - ((self.control_value as u32 * max_start_fret as u32) / MAX_ADC_VALUE as u32) as u8;
         let end_fret = start_fret + WINDOW_SIZE;
         self.fretboard_state.set_frets(start_fret..=end_fret);
     }
