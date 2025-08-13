@@ -52,11 +52,13 @@ impl FretboardState {
     ///
     /// If the note is already a ghost note, it will be removed from the ghost notes.
     pub fn set_active_note(&mut self, note: Note) {
-        if let Some(pos) = self.ghost_notes.iter().position(|n| *n == note) {
-            self.ghost_notes.remove(pos);
+        if self.remove_ghost {
+            if let Some(pos) = self.ghost_notes.iter().position(|n| *n == note) {
+                self.ghost_notes.remove(pos);
+            }
         }
 
-        if !self.active_notes.contains(&note) && self.remove_ghost {
+        if !self.active_notes.contains(&note) {
             self.active_notes.push(note);
         }
     }
