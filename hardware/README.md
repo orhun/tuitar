@@ -51,45 +51,45 @@ They are designed with the [EasyEDA](https://easyeda.com/) software, which you c
 
 | Reference | Value | Qty |
 | --------- | ----- | --- |
-| C1        | 1 µF  | 1   |
+| **C1**    | 1 µF  | 1   |
 
 ### Resistors
 
-| Reference  | Value                | Qty |
-| ---------- | -------------------- | --- |
-| R1, R2, R5 | 1 kΩ                 | 3   |
-| R3, R4     | 10 kΩ                | 2   |
-| RP1, RP2   | 1 MΩ (potentiometer) | 2   |
+| Reference      | Value                | Qty |
+| -------------- | -------------------- | --- |
+| **R1, R2, R5** | 1 kΩ                 | 3   |
+| **R3, R4**     | 10 kΩ                | 2   |
+| **RP1, RP2**   | 1 MΩ (potentiometer) | 2   |
 
 ### Semiconductors
 
 | Reference | Value                 | Qty |
 | --------- | --------------------- | --- |
-| D1        | 1N5819 Schottky Diode | 1   |
-| LED1      | Red LED               | 1   |
-| U1        | LM358P Op-Amp         | 1   |
-| U3        | MAX4466 Mic Amp       | 1   |
-| U4        | MP1584 Buck Converter | 1   |
-| U6        | ESP-WROOM-32D Devkit  | 1   |
+| **D1**    | 1N5819 Schottky Diode | 1   |
+| **LED1**  | Red LED               | 1   |
+| **U1**    | LM358P Op-Amp         | 1   |
+| **U3**    | MAX4466 Mic Amp       | 1   |
+| **U4**    | MP1584 Buck Converter | 1   |
+| **U6**    | ESP-WROOM-32D Devkit  | 1   |
 
 ### Connections
 
 | Reference | Value                  | Qty |
 | --------- | ---------------------- | --- |
-| J1        | Mono Jack              | 1   |
-| 9V        | 9V Input Header        | 1   |
+| **J1**    | Mono Jack              | 1   |
+| **9V**    | 9V Input Header        | 1   |
 | —         | Female Pin Header 1×8  | 1   |
 | —         | Female Pin Header 1×40 | 1   |
 | —         | Male Pin Header 1×8    | 1   |
 
 ### Mechanical
 
-| Reference | Value                             | Qty |
-| --------- | --------------------------------- | --- |
-| SW3       | On/Off Switch                     | 1   |
-| SW1, SW2  | Push Button                       | 2   |
-| LCD1      | TFT 1.8" ST7735 Display (128×160) | 1   |
-| —         | A kickass guitar                  | 1   |
+| Reference    | Value                             | Qty |
+| ------------ | --------------------------------- | --- |
+| **SW3**      | On/Off Switch                     | 1   |
+| **SW1, SW2** | Push Button                       | 2   |
+| **LCD1**     | TFT 1.8" ST7735 Display (128×160) | 1   |
+| —            | A kickass guitar                  | 1   |
 
 ## Assembly
 
@@ -187,6 +187,8 @@ They are designed with the [EasyEDA](https://easyeda.com/) software, which you c
 14. Solder the 9V input header (9V) to the PCB. Make sure the polarity is correct (the longer pin is positive).
 
 <img src="./assets/step-14.jpg" height="600">
+
+15. Celebrate with some cheese!
 
 ## Post-Assembly
 
