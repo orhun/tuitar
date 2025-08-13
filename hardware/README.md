@@ -192,7 +192,9 @@ They are designed with the [EasyEDA](https://easyeda.com/) software, which you c
 
 ## Post-Assembly
 
-Flash the firmware to the ESP-WROOM-32D using the USB connection. See the firmware docs.
+Flash the firmware to the ESP-WROOM-32D using the USB connection.
+
+➡️ See the [firmware documentation](../firmware/README.md) on how to set up the toolchain and flash the firmware.
 
 Carefully place it on the board along with the TFT display. Make sure the display is aligned with the header pins.
 
