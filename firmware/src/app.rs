@@ -195,7 +195,6 @@ impl Application {
 
         if button == Button::Mode && !long_press && self.tab == Tab::Fretboard {
             self.switch_fretboard_mode();
-            return;
         }
     }
 
