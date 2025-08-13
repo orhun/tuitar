@@ -6,6 +6,7 @@ mod utils;
 use std::time::Instant;
 
 use esp_idf_svc::hal::adc::ADC1;
+use esp_idf_svc::hal::delay::Ets;
 use esp_idf_svc::hal::gpio::{ADCPin, Gpio27, Gpio33, InputPin, OutputPin};
 use esp_idf_svc::hal::gpio::{InterruptType, Pull};
 use esp_idf_svc::hal::peripheral::Peripheral;
@@ -28,7 +29,7 @@ use esp_idf_svc::hal::{
 use mousefood::prelude::*;
 use st7735_lcd::{Orientation, ST7735};
 
-use app::{Application, Button, Event, InputMode};
+use app::{Application, Button, ButtonState, Event, InputMode};
 use transform::Transform;
 
 pub(crate) const MAX_ADC_VALUE: u16 = 3129;
@@ -119,14 +120,14 @@ fn main() -> anyhow::Result<()> {
         .set_interrupt_type(InterruptType::NegEdge)
         .unwrap();
     mode_button.set_pull(Pull::Up).unwrap();
-    let mut mode_pressed_at: Option<Instant> = None;
+    let mut mode_button_state = ButtonState::new();
 
     let mut menu_button = PinDriver::input(peripherals.pins.gpio22).unwrap();
     menu_button
         .set_interrupt_type(InterruptType::NegEdge)
         .unwrap();
     menu_button.set_pull(Pull::Up).unwrap();
-    let mut menu_pressed_at: Option<Instant> = None;
+    let mut menu_button_state = ButtonState::new();
 
     let adc1_driver = AdcDriver::new(peripherals.adc1).unwrap();
     let mut jack_adc_channel = init_adc_channel(&adc1_driver, peripherals.pins.gpio36)?;
@@ -163,22 +164,20 @@ fn main() -> anyhow::Result<()> {
             app.handle_event(Event::UpdateControlValue(control_value));
         }
 
-        if mode_button.is_low() {
-            if mode_pressed_at.is_none() {
-                mode_pressed_at = Some(Instant::now());
-            }
-        } else if let Some(pressed_at) = mode_pressed_at.take() {
-            let duration = pressed_at.elapsed().as_millis() as u64;
-            app.handle_press(Button::Mode, duration >= 500);
-        }
+        let mode_button_pressed = mode_button.is_low();
+        let menu_button_pressed = menu_button.is_low();
 
-        if menu_button.is_low() {
-            if menu_pressed_at.is_none() {
-                menu_pressed_at = Some(Instant::now());
-            }
-        } else if let Some(pressed_at) = menu_pressed_at.take() {
-            let duration = pressed_at.elapsed().as_millis() as u64;
-            app.handle_press(Button::Menu, duration >= 500);
+        if mode_button_pressed && menu_button_pressed {
+            app.handle_press(Button::Both);
+            Ets::delay_ms(100);
+        } else {
+            mode_button_state.update(mode_button_pressed, |press_type| {
+                app.handle_press(Button::Mode(press_type));
+            });
+
+            menu_button_state.update(menu_button_pressed, |press_type| {
+                app.handle_press(Button::Menu(press_type));
+            });
         }
 
         samples.fill(0);

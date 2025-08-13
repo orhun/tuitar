@@ -3,7 +3,7 @@ use mousefood::ratatui::layout::Offset;
 use mousefood::ratatui::widgets::Paragraph;
 
 use crate::{
-    app::{Application, Tab},
+    app::{Application, FretboardMode, Tab},
     MAX_ADC_VALUE,
 };
 use tuitar_core::ui::*;
@@ -109,6 +109,21 @@ impl Application {
                     &self.state,
                     &mut self.fretboard_state,
                 );
+
+                if self.fretboard_mode == FretboardMode::Scale {
+                    let scale_line = Line::from(vec![
+                        "<".into(),
+                        self.current_scale.to_string().yellow(),
+                        " (".into(),
+                        self.current_root_note.name().cyan(),
+                        ")>".into(),
+                    ]);
+                    frame.render_widget(
+                        Paragraph::new(scale_line).alignment(Alignment::Center),
+                        // Third line from the top
+                        frame_area.offset(Offset { x: 0, y: 2 }),
+                    );
+                }
             }
         }
 

@@ -15,7 +15,7 @@ pub const STANDARD_TUNING: [Note; 6] = [
 ];
 
 /// Represents a musical note with its pitch and octave.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Note {
     C(u8),
     CSharp(u8),

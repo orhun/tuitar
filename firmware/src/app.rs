@@ -1,7 +1,7 @@
 use std::{fmt::Display, time::Instant};
 
 use mousefood::prelude::*;
-use ratatui_fretboard::FretboardState;
+use ratatui_fretboard::{note::Note, scale::Scale, FretboardState};
 use tui_big_text::PixelSize;
 use tuitar_core::fps::FpsWidget;
 
@@ -9,9 +9,78 @@ use crate::{utils, Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ButtonPressType {
+    Short,
+    Long,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Button {
-    Mode,
-    Menu,
+    Mode(ButtonPressType),
+    Menu(ButtonPressType),
+    Both,
+}
+
+impl Button {
+    pub fn is_mode(&self) -> bool {
+        matches!(self, Button::Mode(_))
+    }
+
+    pub fn is_menu(&self) -> bool {
+        matches!(self, Button::Menu(_))
+    }
+
+    pub fn is_short_press(&self) -> bool {
+        matches!(
+            self,
+            Button::Mode(ButtonPressType::Short) | Button::Menu(ButtonPressType::Short)
+        )
+    }
+
+    pub fn is_long_press(&self) -> bool {
+        matches!(
+            self,
+            Button::Mode(ButtonPressType::Long) | Button::Menu(ButtonPressType::Long)
+        )
+    }
+}
+
+pub struct ButtonState {
+    pressed_at: Option<Instant>,
+}
+
+impl ButtonState {
+    pub fn new() -> Self {
+        Self { pressed_at: None }
+    }
+}
+
+impl ButtonState {
+    pub fn update<F>(&mut self, is_pressed: bool, on_press: F)
+    where
+        F: FnOnce(ButtonPressType),
+    {
+        if is_pressed {
+            // Button is currently down
+            if self.pressed_at.is_none() {
+                self.pressed_at = Some(Instant::now());
+            }
+        } else if let Some(pressed_at) = self.pressed_at.take() {
+            // Button just released
+            let duration = pressed_at.elapsed().as_millis() as u64;
+            let press_type = if duration >= 500 && duration < 2000 {
+                Some(ButtonPressType::Long)
+            } else if duration < 500 {
+                Some(ButtonPressType::Short)
+            } else {
+                None
+            };
+
+            if let Some(press_type) = press_type {
+                on_press(press_type);
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -20,6 +89,7 @@ pub enum Event {
     SwitchTab,
     SwitchInputMode,
     UpdateControlValue(u16),
+    ToggleRootNote,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -103,6 +173,8 @@ pub struct Application {
     pub tab: Tab,
     pub fretboard_mode: FretboardMode,
     pub fretboard_state: FretboardState,
+    pub current_scale: Scale,
+    pub current_root_note: Note,
 }
 
 impl Application {
@@ -124,6 +196,8 @@ impl Application {
             tab: Tab::default(),
             fretboard_mode: FretboardMode::Live,
             fretboard_state: FretboardState::default(),
+            current_scale: Scale::MajorPentatonic,
+            current_root_note: Note::A(4),
         }
     }
 
@@ -145,9 +219,11 @@ impl Application {
 
     pub fn switch_fretboard_mode(&mut self) {
         self.fretboard_state.clear_ghost_notes();
+        self.fretboard_state.remove_ghost = true;
         match self.fretboard_mode {
             FretboardMode::Live => {
                 self.fretboard_mode = FretboardMode::Scale;
+                self.set_scale_notes();
             }
             FretboardMode::Scale => {
                 self.fretboard_mode = FretboardMode::Random;
@@ -159,6 +235,20 @@ impl Application {
                 self.fretboard_mode = FretboardMode::Live;
             }
         }
+    }
+
+    pub fn set_scale_notes(&mut self) {
+        self.fretboard_state.clear_ghost_notes();
+        self.fretboard_state.remove_ghost = false;
+        self.fretboard_state.set_ghost_notes(
+            self.current_scale
+                .fretboard_notes(self.current_root_note, &self.fretboard_state.frets),
+        );
+    }
+
+    pub fn toggle_current_root_note(&mut self) {
+        let index = self.current_root_note.semitone_index() % 12;
+        self.current_root_note = Note::from_semitone_index(index + 1);
     }
 
     pub fn scroll_fretboard(&mut self) {
@@ -181,19 +271,35 @@ impl Application {
         }
     }
 
-    pub fn handle_press(&mut self, button: Button, long_press: bool) {
-        if button == Button::Mode && long_press {
+    pub fn handle_press(&mut self, button: Button) {
+        if button == Button::Both {
+            self.handle_event(Event::ToggleRootNote);
+            return;
+        }
+
+        if button == Button::Mode(ButtonPressType::Long) {
             self.handle_event(Event::SwitchInputMode);
             return;
         }
 
-        if button == Button::Menu && !long_press {
+        if button.is_menu() && button.is_short_press() {
             self.handle_event(Event::SwitchTab);
             return;
         }
 
-        if button == Button::Mode && !long_press && self.tab == Tab::Fretboard {
+        if button.is_mode() && button.is_short_press() && self.tab == Tab::Fretboard {
             self.switch_fretboard_mode();
+            return;
+        }
+
+        if button.is_menu()
+            && button.is_long_press()
+            && self.tab == Tab::Fretboard
+            && self.fretboard_mode == FretboardMode::Scale
+        {
+            self.current_scale = self.current_scale.next();
+            self.set_scale_notes();
+            return;
         }
     }
 
@@ -212,6 +318,12 @@ impl Application {
                 if self.tab == Tab::Fretboard {
                     self.scroll_fretboard();
                 }
+            }
+            Event::ToggleRootNote => {
+                self.toggle_current_root_note();
+                self.set_scale_notes();
+                #[cfg(feature = "logging")]
+                log::info!("Current root note changed: {}", self.current_root_note);
             }
         }
     }
