@@ -21,7 +21,7 @@
 
 ---
 
-**Tuitar** is a terminal-based guitar training tool that also lives in your pocket.
+**Tuitar** is a terminal-based guitar training tool that also runs standalone on your desk.
 
 It currently supports real-time visualization of:
 
