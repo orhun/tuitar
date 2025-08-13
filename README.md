@@ -17,6 +17,9 @@
     <a href="https://github.com/orhun/tuitar/blob/master/LICENSE">
         <img src="https://img.shields.io/crates/l/tuitar?color=000000">
     </a>
+    <a href="https://github.com/ratatui/ratatui">
+        <img src="https://ratatui.rs/built-with-ratatui/badge.svg">
+    </a>
 </p>
 
 ---

@@ -1,5 +1,7 @@
 # Tuitar Firmware
 
+[![Built With Ratatui](https://ratatui.rs/built-with-ratatui/badge.svg)](https://ratatui.rs/)
+
 This directory contains the firmware that runs on [ESP-WROOM-32D], the main microcontroller of Tuitar.
 
 🦀 _Powered with Rust & built with [Ratatui] via [Mousefood] backend_ 🧀
