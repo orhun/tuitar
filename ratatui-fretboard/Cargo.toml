@@ -2,7 +2,7 @@
 name = "ratatui-fretboard"
 description = "Guitar fretboard widget for Ratatui"
 documentation = "https://docs.rs/ratatui-fretboard"
-version.workspace = true
+version = "0.2.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
