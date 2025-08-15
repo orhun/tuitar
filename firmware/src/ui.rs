@@ -1,10 +1,10 @@
-use mousefood::prelude::*;
 use mousefood::ratatui::layout::Offset;
 use mousefood::ratatui::widgets::Paragraph;
+use mousefood::{prelude::*, ratatui::widgets::LineGauge};
 use ratatui_fretboard::Fretboard;
 
 use crate::{
-    app::{Application, FretboardMode, Tab},
+    app::{Application, FretboardMode, Tab, MAX_RANDOM_INTERVAL},
     MAX_ADC_VALUE,
 };
 use tuitar_core::{songs::SMOKE_ON_THE_WATER, ui::*};
@@ -134,6 +134,28 @@ impl Application {
                         Paragraph::new(song_line).alignment(Alignment::Center),
                         // Third line from the top
                         frame_area.offset(Offset { x: 0, y: 2 }),
+                    );
+                } else if self.fretboard_mode == FretboardMode::Random {
+                    let random_line = Line::from(vec![
+                        "Points: ".yellow(),
+                        self.random_mode_points.to_string().cyan(),
+                    ]);
+                    frame.render_widget(
+                        Paragraph::new(random_line).alignment(Alignment::Center),
+                        // Third line from the top
+                        frame_area.offset(Offset { x: 0, y: 2 }),
+                    );
+                    let ratio = 1.0
+                        - (self.last_random.elapsed().as_millis() as f64
+                            / MAX_RANDOM_INTERVAL as f64)
+                            .clamp(0.0, 1.0);
+                    frame.render_widget(
+                        LineGauge::default()
+                            .filled_style(Color::Green)
+                            .unfilled_style(Color::Red)
+                            .ratio(ratio),
+                        // Second line from the top
+                        frame_area.offset(Offset { x: 0, y: 1 }),
                     );
                 }
             }

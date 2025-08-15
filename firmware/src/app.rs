@@ -8,6 +8,8 @@ use tuitar_core::{fps::FpsWidget, songs::*};
 use crate::{utils, Transform, MAX_ADC_VALUE};
 use tuitar_core::state::State;
 
+pub(crate) const MAX_RANDOM_INTERVAL: u64 = 5000;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ButtonPressType {
     Short,
@@ -177,6 +179,8 @@ pub struct Application {
     pub current_scale: Scale,
     pub current_root_note: Note,
     pub song_note_index: usize,
+    pub random_mode_points: usize,
+    pub last_random: Instant,
 }
 
 impl Application {
@@ -202,6 +206,8 @@ impl Application {
             remove_ghost: true,
             current_root_note: Note::A(4),
             song_note_index: 0,
+            random_mode_points: 0,
+            last_random: Instant::now(),
         }
     }
 
@@ -225,6 +231,7 @@ impl Application {
         self.fretboard_state.clear_ghost_notes();
         self.remove_ghost = true;
         self.song_note_index = 0;
+        self.random_mode_points = 0;
         match self.fretboard_mode {
             FretboardMode::Live => {
                 self.fretboard_mode = FretboardMode::Scale;
@@ -267,12 +274,15 @@ impl Application {
     }
 
     pub fn tick(&mut self) {
-        if self.tab == Tab::Fretboard
-            && self.fretboard_mode == FretboardMode::Random
-            && self.fretboard_state.ghost_notes.is_empty()
-        {
-            self.fretboard_state
-                .set_ghost_note(utils::generate_random_note(0..=self.state.fret_count));
+        if self.tab == Tab::Fretboard && self.fretboard_mode == FretboardMode::Random {
+            if self.fretboard_state.ghost_notes.is_empty() {
+                self.fretboard_state
+                    .set_ghost_note(utils::generate_random_note(0..=self.state.fret_count));
+                self.last_random = Instant::now();
+            } else if self.last_random.elapsed().as_millis() as u64 > MAX_RANDOM_INTERVAL {
+                self.random_mode_points = self.random_mode_points.saturating_sub(1);
+                self.fretboard_state.clear_ghost_notes();
+            }
         }
 
         if self.tab == Tab::Fretboard
@@ -300,6 +310,7 @@ impl Application {
                     .position(|n| *n == note)
                 {
                     self.fretboard_state.ghost_notes.remove(pos);
+                    self.random_mode_points += 1;
                 }
             }
 
