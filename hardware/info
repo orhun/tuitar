@@ -4,7 +4,7 @@
   "name": "tuitar",
   "content": "",
   "created_at": "2025-07-12 23:35:06",
-  "updated_at": "2025-08-09 23:32:10",
+  "updated_at": "2025-08-15 00:30:18",
   "stick": "",
   "documents": [
     {
@@ -135,9 +135,21 @@
         ],
         [
           "R_3386P_US",
-          2,
+          1,
           "POT-HOLES",
-          "RP1,RP2",
+          "RP1",
+          {
+            "Manufacturer Part": "",
+            "Manufacturer": "",
+            "Supplier": "LCSC",
+            "Supplier Part": ""
+          }
+        ],
+        [
+          "R",
+          1,
+          "POT-HOLES",
+          "RP2",
           {
             "Manufacturer Part": "",
             "Manufacturer": "",
@@ -218,11 +230,11 @@
           }
         ]
       ],
-      "updateTime": 1754771530,
+      "updateTime": 1755207018,
       "createTime": 1752352507,
       "histories": [],
       "created_at": "2025-07-12 23:35:07",
-      "updated_at": "2025-08-09 23:32:10"
+      "updated_at": "2025-08-15 00:30:18"
     },
     {
       "uuid": "a2ec2efa4c46dfe1d3ed4e7c820c6dc4",
@@ -457,5 +469,5 @@
   "title": "tuitar",
   "foldername": "tuitar",
   "schfilename": "schematics.json",
-  "schfilemtime": 1754771530753
+  "schfilemtime": 1755207018240
 }
