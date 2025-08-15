@@ -24,21 +24,26 @@
 
 ---
 
-**Tuitar** is a terminal-based guitar training tool that also runs standalone on your desk.
+**Tuitar** is a terminal-based guitar training tool that also runs standalone on ESP32 hardware.
 
-It currently supports real-time visualization of:
+It offers real-time visualizations, including:
 
-- **Pitch** – Perfect for tuning and identifying notes.
-- **Waveform, frequency & gain** – Watch the sound as it moves.
-- **Fretboard** – See detected notes mapped directly onto the guitar neck for instant feedback.
+- **Pitch**: Perfect for tuning and identifying notes.
+- **Waveform, frequency & gain**: Watch the sound as it moves.
+- **Fretboard**: See detected notes mapped directly onto the guitar neck for instant feedback.
 
-Also runs standalone on ESP32 hardware.
+Fretboard practice modes:
+
+1. Live mode: Show the currently played note.
+2. Scale mode: Display all notes in a selected scale.
+
+Fretboard game modes where you can test your skills:
+
+1. Random mode: Show a random note on the fretboard.
+2. Song mode: Display a song's notes on the fretboard.
 
 > [!NOTE]
 > Building all of this [on livestream](https://www.youtube.com/@orhundev/streams).
-
-> [!WARNING]
-> This is a work in progress.
 
 ## Demo
 
