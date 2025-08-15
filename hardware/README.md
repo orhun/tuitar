@@ -7,6 +7,7 @@
 <!-- vim-markdown-toc GFM -->
 
 - [Schematics](#schematics)
+  - [How does this work?](#how-does-this-work)
 - [PCB](#pcb)
 - [Bill of Materials](#bill-of-materials)
   - [Capacitors](#capacitors)
@@ -34,6 +35,21 @@ They are designed with the [EasyEDA](https://easyeda.com/) software, which you c
 <img src="./assets/schematics.png" height="600">
 
 ➡️ Download the [**schematics JSON file here**](./schematics.json).
+
+### How does this work?
+
+The ESP-WROOM-32D module can capture the audio input from:
+
+1. Microphone via the MAX4466 microphone amplifier.
+2. Guitar via the mono audio jack.
+
+The signal from the mono audio jack is amplified by the LM358P op-amp which is powered by 9V volts. The same 9V power is also reduced to 3.3V using the MP1584 buck converter to power the ESP-WROOM-32D and the rest of the components.
+
+There is also a gain adjustment potentiometer (RP1) for the LM358P op-amp.
+
+There are two arbitrary push buttons (SW1, SW2) for user interaction, a toggle switch (SW3) to turn the device on/off and an arbitrary potentiometer (RP2). An LED (LED1) is used to indicate the power status.
+
+The ESP-WROOM-32D is connected to the 1.8" ST7735 TFT display where the UI is rendered.
 
 ## PCB
 
