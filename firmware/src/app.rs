@@ -173,6 +173,7 @@ pub struct Application {
     pub tab: Tab,
     pub fretboard_mode: FretboardMode,
     pub fretboard_state: FretboardState,
+    pub remove_ghost: bool,
     pub current_scale: Scale,
     pub current_root_note: Note,
 }
@@ -197,6 +198,7 @@ impl Application {
             fretboard_mode: FretboardMode::Live,
             fretboard_state: FretboardState::default(),
             current_scale: Scale::MajorPentatonic,
+            remove_ghost: true,
             current_root_note: Note::A(4),
         }
     }
@@ -219,7 +221,7 @@ impl Application {
 
     pub fn switch_fretboard_mode(&mut self) {
         self.fretboard_state.clear_ghost_notes();
-        self.fretboard_state.remove_ghost = true;
+        self.remove_ghost = true;
         match self.fretboard_mode {
             FretboardMode::Live => {
                 self.fretboard_mode = FretboardMode::Scale;
@@ -239,7 +241,7 @@ impl Application {
 
     pub fn set_scale_notes(&mut self) {
         self.fretboard_state.clear_ghost_notes();
-        self.fretboard_state.remove_ghost = false;
+        self.remove_ghost = false;
         self.fretboard_state.set_ghost_notes(
             self.current_scale
                 .fretboard_notes(self.current_root_note, &self.fretboard_state.frets),
@@ -268,6 +270,28 @@ impl Application {
         {
             self.fretboard_state
                 .set_ghost_note(utils::generate_random_note(0..=self.state.fret_count));
+        }
+
+        self.fretboard_state.clear_active_notes();
+        if let Some(note) = self
+            .state
+            .get_current_note()
+            .and_then(|(note, _)| note.try_into().ok())
+        {
+            if self.remove_ghost {
+                if let Some(pos) = self
+                    .fretboard_state
+                    .ghost_notes
+                    .iter()
+                    .position(|n| *n == note)
+                {
+                    self.fretboard_state.ghost_notes.remove(pos);
+                }
+            }
+
+            if !self.fretboard_state.active_notes.contains(&note) {
+                self.fretboard_state.active_notes.push(note);
+            }
         }
     }
 

@@ -19,8 +19,6 @@ pub struct FretboardState {
     pub active_notes: Vec<Note>,
     /// The notes that are being used for tracking.
     pub ghost_notes: Vec<Note>,
-    /// Whether to remove ghost notes when setting an active note.
-    pub remove_ghost: bool,
     /// The range of frets to display on the fretboard.
     pub frets: RangeInclusive<u8>,
 }
@@ -31,7 +29,6 @@ impl Default for FretboardState {
         Self {
             active_notes: Vec::new(),
             ghost_notes: Vec::new(),
-            remove_ghost: true,
             frets: 0..=12,
         }
     }
@@ -43,7 +40,6 @@ impl FretboardState {
         Self {
             active_notes: Vec::new(),
             ghost_notes: Vec::new(),
-            remove_ghost: true,
             frets,
         }
     }
@@ -52,12 +48,6 @@ impl FretboardState {
     ///
     /// If the note is already a ghost note, it will be removed from the ghost notes.
     pub fn set_active_note(&mut self, note: Note) {
-        if self.remove_ghost {
-            if let Some(pos) = self.ghost_notes.iter().position(|n| *n == note) {
-                self.ghost_notes.remove(pos);
-            }
-        }
-
         if !self.active_notes.contains(&note) {
             self.active_notes.push(note);
         }
@@ -297,8 +287,7 @@ mod tests {
         FretboardState {
             active_notes: vec![Note::A(4)],
             ghost_notes: Vec::new(),
-            frets: 0..=12,
-            remove_ghost: true,
+            frets: 0..=12
         },
         Buffer::with_lines([
             "E4 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼───┼───║ ",
@@ -319,8 +308,7 @@ mod tests {
         FretboardState {
             active_notes: vec![Note::F(4)],
             ghost_notes: Vec::new(),
-            frets: 0..=6,
-            remove_ghost: true,
+            frets: 0..=6
         },
         Buffer::with_lines([
             "E4 ║─┼──⬤──┼─────┼─────┼─────┼─────║",
@@ -352,7 +340,6 @@ mod tests {
             active_notes: vec![Note::F(2)],
             ghost_notes: Vec::new(),
             frets: 0..=3,
-            remove_ghost: true,
         },
         Buffer::with_lines([
             "E2 ║─┼──⬤──┼─────║  ",
@@ -373,7 +360,6 @@ mod tests {
             active_notes: vec![Note::F(3)],
             ghost_notes: Vec::new(),
             frets: 2..=5,
-            remove_ghost: true,
         },
         Buffer::with_lines([
             "D3 ║─┼──⬤───┼──────║    ",
@@ -395,7 +381,6 @@ mod tests {
             active_notes: vec![Note::E(3)],
             ghost_notes: Vec::new(),
             frets: 0..=4,
-            remove_ghost: true,
         },
         Buffer::with_lines([
             "D3 ║─┼──────┼──⬤───┼──────║       ",
@@ -419,7 +404,6 @@ mod tests {
             active_notes: vec![Note::FSharp(4)],
             ghost_notes: Vec::new(),
             frets: 0..=3,
-            remove_ghost: true,
         },
         Buffer::with_lines([
             "G3 ║─┼──────┼──────║      ",
@@ -443,7 +427,6 @@ mod tests {
             active_notes: vec![Note::FSharp(4), Note::F(3)],
             ghost_notes: Vec::new(),
             frets: 0..=20,
-            remove_ghost: true,
         },
         Buffer::with_lines([
             "E4 ║─┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
@@ -498,7 +481,6 @@ mod tests {
             Note::B(2),
         ],
         frets: 0..=16,
-        remove_ghost: false,
     },
     Buffer::with_lines([
         "D0 ║─┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",

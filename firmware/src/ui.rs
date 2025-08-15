@@ -1,6 +1,7 @@
 use mousefood::prelude::*;
 use mousefood::ratatui::layout::Offset;
 use mousefood::ratatui::widgets::Paragraph;
+use ratatui_fretboard::Fretboard;
 
 use crate::{
     app::{Application, FretboardMode, Tab},
@@ -103,10 +104,10 @@ impl Application {
                         1,
                     ),
                 );
-                draw_fretboard(
-                    frame,
+
+                frame.render_stateful_widget(
+                    &Fretboard::default(),
                     frame.area().offset(Offset { x: 0, y: 3 }),
-                    &self.state,
                     &mut self.fretboard_state,
                 );
 
