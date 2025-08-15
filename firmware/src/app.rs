@@ -296,12 +296,17 @@ impl Application {
     }
 
     pub fn handle_press(&mut self, button: Button) {
-        if button == Button::Both {
+        if button == Button::Both
+            && self.tab == Tab::Fretboard
+            && self.fretboard_mode == FretboardMode::Scale
+        {
             self.handle_event(Event::ToggleRootNote);
             return;
         }
 
-        if button == Button::Mode(ButtonPressType::Long) {
+        if button == Button::Mode(ButtonPressType::Long)
+            || (button == Button::Mode(ButtonPressType::Short) && self.tab != Tab::Fretboard)
+        {
             self.handle_event(Event::SwitchInputMode);
             return;
         }
