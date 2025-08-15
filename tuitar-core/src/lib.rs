@@ -9,3 +9,6 @@ pub mod state;
 
 /// FPS measurement.
 pub mod fps;
+
+/// Song handling.
+pub mod songs;

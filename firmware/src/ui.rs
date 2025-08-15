@@ -7,7 +7,7 @@ use crate::{
     app::{Application, FretboardMode, Tab},
     MAX_ADC_VALUE,
 };
-use tuitar_core::ui::*;
+use tuitar_core::{songs::SMOKE_ON_THE_WATER, ui::*};
 
 const LOGO_ASCII: &str = r#"
               ████  █████    
@@ -121,6 +121,17 @@ impl Application {
                     ]);
                     frame.render_widget(
                         Paragraph::new(scale_line).alignment(Alignment::Center),
+                        // Third line from the top
+                        frame_area.offset(Offset { x: 0, y: 2 }),
+                    );
+                } else if self.fretboard_mode == FretboardMode::Song {
+                    let song_line = Line::from(vec![
+                        "<".into(),
+                        SMOKE_ON_THE_WATER.name.yellow(),
+                        ">".into(),
+                    ]);
+                    frame.render_widget(
+                        Paragraph::new(song_line).alignment(Alignment::Center),
                         // Third line from the top
                         frame_area.offset(Offset { x: 0, y: 2 }),
                     );

@@ -15,3 +15,8 @@ tui-bar-graph = "0.1.1"
 tui-big-text.workspace = true
 ratatui-fretboard.workspace = true
 log = { workspace = true, optional = true }
+guitarpro = "0.1.0"
+
+[build-dependencies]
+guitarpro = "0.1.0"
+ratatui-fretboard.workspace = true
