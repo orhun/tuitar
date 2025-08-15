@@ -455,6 +455,66 @@ mod tests {
             "     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20",
         ])
     )]
+    #[case::absurdly_big_fretboard(
+    Rect::new(0, 0, 60, 12),
+    Fretboard {
+        string_names: vec![
+            Note::C(3),
+            Note::G(2),
+            Note::D(2),
+            Note::A(1),
+            Note::E(1),
+            Note::B(0),
+            Note::F(0),
+            Note::C(0),
+            Note::G(0),
+            Note::D(0),
+        ],
+        ..Fretboard::default()
+    }
+    .with_active_note_style(Style::default())
+    .with_fret_number_style(Style::default())
+    .with_note_name_style(Style::default())
+    .with_ghost_note_style(Style::default())
+    .with_active_string_style(Style::default()),
+    FretboardState {
+        active_notes: vec![
+            Note::C(3),
+            Note::G(2),
+            Note::D(2),
+            Note::A(1),
+            Note::E(1),
+            Note::B(0),
+            Note::F(0),
+            Note::C(0),
+            Note::G(0),
+            Note::D(0),
+        ],
+        ghost_notes: vec![
+            Note::E(4),
+            Note::A(3),
+            Note::D(3),
+            Note::G(2),
+            Note::B(2),
+        ],
+        frets: 0..=16,
+        remove_ghost: false,
+    },
+    Buffer::with_lines([
+        "D0 ║─┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",
+        "G0 ║─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",
+        "C0 ║─┼───┼─⬤─┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼──",
+        "F0 ║─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼──",
+        "B0 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼──",
+        "E1 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼──",
+        "A1 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼─✖",
+        "D2 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼─✖─┼─⬤─┼───┼─✖─┼───┼──",
+        "G2 ║─┼───┼───┼───┼─✖─┼─⬤─┼───┼─✖─┼───┼───┼───┼───┼───┼───┼─✖",
+        "C3 ║─┼───┼─✖─┼───┼───┼───┼───┼───┼───┼─✖─┼───┼───┼───┼───┼──",
+        "     1   2   3   4   5   6   7   8   9  10  11  12  13  14  ",
+        "                                                            ",
+    ])
+)]
 
     fn render_fretboard(
         #[case] area: Rect,
