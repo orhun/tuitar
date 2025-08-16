@@ -61,7 +61,7 @@ impl Scale {
     pub fn notes(&self, root: Note) -> Vec<Note> {
         self.intervals()
             .iter()
-            .map(|&interval| root.clone() + interval)
+            .map(|&interval| root + interval)
             .collect()
     }
 
@@ -73,7 +73,7 @@ impl Scale {
             .iter()
             .flat_map(|open_note| {
                 frets.clone().filter_map(|fret| {
-                    let note = open_note.clone() + fret;
+                    let note = *open_note + fret;
                     if scale_pcs.contains(&(note.semitone_index() % 12)) {
                         Some(note)
                     } else {

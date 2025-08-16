@@ -8,7 +8,7 @@ const SONGS: &[(&str, &str, &str, SongFormat)] = &[
         "UNSCRIPTED_VIOLENCE",
         "Unscripted Violence",
         "songs/unscripted-violence.mid",
-        SongFormat::MIDI(0),
+        SongFormat::Midi(0),
     ),
     (
         "SMOKE_ON_THE_WATER",
@@ -30,7 +30,7 @@ enum SongFormat {
     GP3,
     GP4,
     GP5,
-    MIDI(usize),
+    Midi(usize),
 }
 
 /// Convert a Guitar Pro note to a `ratatui_fretboard::note::Note`
@@ -151,7 +151,7 @@ fn main() {
         let data = fs::read(path).unwrap_or_else(|_| panic!("Missing file: {path}"));
         let parsed_notes = match fmt {
             SongFormat::GP3 | SongFormat::GP4 | SongFormat::GP5 => parse_gp_bytes(&data, *fmt),
-            SongFormat::MIDI(index) => parse_midi_bytes(&data, *index),
+            SongFormat::Midi(index) => parse_midi_bytes(&data, *index),
         };
 
         song_idents.push(ident.to_string());

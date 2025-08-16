@@ -228,7 +228,7 @@ impl StatefulWidget for &Fretboard {
         // Draw each string
         for (i, string_note) in self.tuning.iter().rev().enumerate() {
             let y = area.y + i as u16;
-            let base_note = string_note.clone();
+            let base_note = *string_note;
 
             // Draw string name
             let name = base_note.to_string();
@@ -245,7 +245,7 @@ impl StatefulWidget for &Fretboard {
 
             // Draw fret symbols for each fret
             for (j, fret_num) in fret_labels.iter().enumerate() {
-                let note = base_note.clone() + *fret_num;
+                let note = base_note + *fret_num;
 
                 let fret_width = if j == 0 { 1 } else { fret_width };
                 let highlight_active = state.active_notes.contains(&note);
