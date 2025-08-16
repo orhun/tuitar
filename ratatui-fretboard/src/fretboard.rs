@@ -95,7 +95,7 @@ impl FretboardState {
 /// and their positions on a guitar fretboard.
 pub struct Fretboard {
     /// The names of the strings on the fretboard.
-    string_names: Vec<Note>,
+    tuning: Vec<Note>,
     /// The style for fret numbers.
     fret_number_style: Style,
     /// The style for note names.
@@ -116,7 +116,7 @@ impl Default for Fretboard {
     /// Creates a default `Fretboard` with standard guitar tuning.
     fn default() -> Self {
         Self {
-            string_names: STANDARD_TUNING.to_vec(),
+            tuning: STANDARD_TUNING.to_vec(),
             fret_number_style: Style::default().fg(Color::Magenta),
             note_name_style: Style::default().fg(Color::Green),
             active_note_style: Style::default().fg(Color::Yellow),
@@ -137,8 +137,8 @@ impl Fretboard {
     }
 
     /// Sets the names of the strings on the fretboard.
-    pub fn with_string_names(mut self, string_names: Vec<Note>) -> Self {
-        self.string_names = string_names;
+    pub fn with_tuning(mut self, tuning: Vec<Note>) -> Self {
+        self.tuning = tuning;
         self
     }
 
@@ -194,7 +194,7 @@ impl StatefulWidget for &Fretboard {
         let fret_width = available_width / fret_labels.len();
 
         // Draw top border
-        for (i, string_note) in self.string_names.iter().rev().enumerate() {
+        for (i, string_note) in self.tuning.iter().rev().enumerate() {
             let y = area.y + i as u16;
             let base_note = string_note.clone();
 
@@ -258,7 +258,7 @@ impl StatefulWidget for &Fretboard {
         }
 
         // Draw fret number row
-        let label_y = area.y + self.string_names.len() as u16;
+        let label_y = area.y + self.tuning.len() as u16;
         let mut label_line = String::from("   ");
         for (j, fret_num) in fret_labels.iter().skip(1).enumerate() {
             if j == 0 {
@@ -329,7 +329,7 @@ mod tests {
     #[case::single_string_open_note(
         Rect::new(0, 0, 20, 3),
         Fretboard {
-            string_names: vec![Note::E(2)],
+            tuning: vec![Note::E(2)],
             ..Fretboard::default()
         }
         .with_active_note_style(Style::default())
@@ -350,7 +350,7 @@ mod tests {
     #[case::two_strings_custom_frets(
         Rect::new(0, 0, 24, 4),
         Fretboard {
-            string_names: vec![Note::A(2), Note::D(3)],
+            tuning: vec![Note::A(2), Note::D(3)],
             ..Fretboard::default()
         }
         .with_active_note_style(Style::default())
@@ -371,7 +371,7 @@ mod tests {
     #[case::custom_tuning_bass_style(
         Rect::new(0, 0, 34, 6),
         Fretboard {
-            string_names: vec![Note::B(1), Note::E(2), Note::A(2), Note::D(3)],
+            tuning: vec![Note::B(1), Note::E(2), Note::A(2), Note::D(3)],
             ..Fretboard::default()
         }
         .with_active_note_style(Style::default())
@@ -394,7 +394,7 @@ mod tests {
     #[case::compact_display_limited_width(
         Rect::new(0, 0, 26, 6),
         Fretboard {
-            string_names: vec![Note::E(4), Note::B(3), Note::G(3)],
+            tuning: vec![Note::E(4), Note::B(3), Note::G(3)],
             ..Fretboard::default()
         }
         .with_active_note_style(Style::default())
@@ -417,7 +417,7 @@ mod tests {
     #[case::extremely_long_fretboard(
         Rect::new(0, 0, 120, 7),
         Fretboard {
-            string_names: STANDARD_TUNING.to_vec(),
+            tuning: STANDARD_TUNING.to_vec(),
             ..Fretboard::default()
         }
         .with_active_note_style(Style::default())
@@ -441,7 +441,7 @@ mod tests {
     #[case::absurdly_big_fretboard(
     Rect::new(0, 0, 60, 12),
     Fretboard {
-        string_names: vec![
+        tuning: vec![
             Note::C(3),
             Note::G(2),
             Note::D(2),
