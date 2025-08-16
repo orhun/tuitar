@@ -1,27 +1,50 @@
-#![allow(unused)]
 use guitarpro::{gp::Song as GpSong, note::Note as GpNote, track::Track};
+use midly::{MidiMessage, Smf, TrackEventKind};
 use ratatui_fretboard::note::Note;
 use std::{env, fs, path::PathBuf};
 
-#[derive(Clone, Debug)]
-struct SongData {
-    name: &'static str,
-    notes: Vec<Vec<Note>>,
-}
+const SONGS: &[(&str, &str, &str, SongFormat)] = &[
+    (
+        "UNSCRIPTED_VIOLENCE",
+        "Unscripted Violence",
+        "songs/unscripted-violence.mid",
+        SongFormat::MIDI(0),
+    ),
+    (
+        "SMOKE_ON_THE_WATER",
+        "Smoke on the Water",
+        "songs/deep-purple-smoke_on_the_water.gp3",
+        SongFormat::GP3,
+    ),
+    (
+        "MINECRAFT_SWEDEN",
+        "Minecraft - Sweden",
+        "songs/minecraft-sweden.gp5",
+        SongFormat::GP5,
+    ),
+];
 
 #[derive(Debug, Clone, Copy)]
-enum GpFormat {
+#[allow(dead_code)]
+enum SongFormat {
     GP3,
     GP4,
     GP5,
+    MIDI(usize),
 }
 
+/// Convert a Guitar Pro note to a `ratatui_fretboard::note::Note`
 fn gp_to_note(track: &Track, gp_note: &GpNote) -> Note {
     let string_index = (gp_note.string - 1) as usize;
     let tuning_midi = track.strings[string_index].1;
     let midi_value = (tuning_midi + gp_note.value as i8) as u8;
     let octave = (midi_value as i8 / 12) - 1;
 
+    midi_to_note(midi_value, octave)
+}
+
+/// Convert raw MIDI note number + octave into `Note`
+fn midi_to_note(midi_value: u8, octave: i8) -> Note {
     match midi_value % 12 {
         0 => Note::C(octave as u8),
         1 => Note::CSharp(octave as u8),
@@ -39,12 +62,14 @@ fn gp_to_note(track: &Track, gp_note: &GpNote) -> Note {
     }
 }
 
-fn parse_song_bytes(data: &[u8], format: GpFormat) -> Vec<Vec<Note>> {
+/// Parse Guitar Pro bytes
+fn parse_gp_bytes(data: &[u8], format: SongFormat) -> Vec<Vec<Note>> {
     let mut song = GpSong::default();
     match format {
-        GpFormat::GP3 => song.read_gp3(data),
-        GpFormat::GP4 => song.read_gp4(data),
-        GpFormat::GP5 => song.read_gp5(data),
+        SongFormat::GP3 => song.read_gp3(data),
+        SongFormat::GP4 => song.read_gp4(data),
+        SongFormat::GP5 => song.read_gp5(data),
+        _ => unreachable!(),
     };
 
     let mut notes = Vec::new();
@@ -66,24 +91,51 @@ fn parse_song_bytes(data: &[u8], format: GpFormat) -> Vec<Vec<Note>> {
     notes
 }
 
+/// Parse MIDI bytes, only keeping events from a specific track index
+fn parse_midi_bytes(data: &[u8], guitar_track_index: usize) -> Vec<Vec<Note>> {
+    let smf = Smf::parse(data).expect("Invalid MIDI file");
+    let mut beats = Vec::new();
+
+    if let Some(track) = smf.tracks.get(guitar_track_index) {
+        let mut current_beat = Vec::new();
+
+        for event in track {
+            if event.delta > 0 {
+                // commit beat when time moves forward
+                if !current_beat.is_empty() {
+                    beats.push(current_beat.clone());
+                    current_beat.clear();
+                }
+            }
+
+            if let TrackEventKind::Midi { channel, message } = event.kind {
+                // ignore drums (channel 9)
+                if channel == 9 {
+                    continue;
+                }
+
+                if let MidiMessage::NoteOn { key, vel } = message {
+                    if vel > 0 {
+                        let midi_val = key.as_int();
+                        let octave = (midi_val as i8 / 12) - 1;
+                        current_beat.push(midi_to_note(midi_val, octave));
+                    }
+                }
+            }
+        }
+
+        // push the last group if not empty
+        if !current_beat.is_empty() {
+            beats.push(current_beat);
+        }
+    }
+
+    beats
+}
+
 fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
     let songs_rs_path = out_dir.join("songs.rs");
-
-    let songs = vec![
-        (
-            "SMOKE_ON_THE_WATER",
-            "Smoke on the Water",
-            "songs/deep-purple-smoke_on_the_water.gp3",
-            GpFormat::GP3,
-        ),
-        (
-            "MINECRAFT_SWEDEN",
-            "Minecraft - Sweden",
-            "songs/minecraft-sweden.gp5",
-            GpFormat::GP5,
-        ),
-    ];
 
     let mut output = String::new();
     output.push_str("use ratatui_fretboard::note::Note;\n\n");
@@ -95,9 +147,13 @@ fn main() {
 
     let mut song_idents = Vec::new();
 
-    for (ident, name, path, fmt) in &songs {
+    for (ident, name, path, fmt) in SONGS {
         let data = fs::read(path).unwrap_or_else(|_| panic!("Missing file: {path}"));
-        let parsed_notes = parse_song_bytes(&data, *fmt);
+        let parsed_notes = match fmt {
+            SongFormat::GP3 | SongFormat::GP4 | SongFormat::GP5 => parse_gp_bytes(&data, *fmt),
+            SongFormat::MIDI(index) => parse_midi_bytes(&data, *index),
+        };
+
         song_idents.push(ident.to_string());
 
         output.push_str(&format!(
