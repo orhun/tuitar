@@ -35,6 +35,12 @@ jobs:
             args: -- -D warnings
             target: xtensa-esp32-espidf
             working-dir: firmware
+          - command: test
+            target: x86_64-unknown-linux-gnu
+            working-dir: ratatui-fretboard
+          - command: test
+            target: x86_64-unknown-linux-gnu
+            working-dir: tuitar-core
     steps:
       - name: Install dependencies
         run: |
