@@ -178,6 +178,7 @@ pub struct Application {
     pub remove_ghost: bool,
     pub current_scale: Scale,
     pub current_root_note: Note,
+    pub current_song_index: usize,
     pub song_note_index: usize,
     pub random_mode_points: usize,
     pub last_random: Instant,
@@ -205,6 +206,7 @@ impl Application {
             current_scale: Scale::MajorPentatonic,
             remove_ghost: true,
             current_root_note: Note::A(4),
+            current_song_index: 0,
             song_note_index: 0,
             random_mode_points: 0,
             last_random: Instant::now(),
@@ -273,6 +275,12 @@ impl Application {
         self.fretboard_state.set_frets(start_fret..=end_fret);
     }
 
+    pub fn toggle_current_song(&mut self) {
+        self.current_song_index = (self.current_song_index + 1) % SONGS.len();
+        self.song_note_index = 0;
+        self.fretboard_state.clear_ghost_notes();
+    }
+
     pub fn tick(&mut self) {
         if self.tab == Tab::Fretboard && self.fretboard_mode == FretboardMode::Random {
             if self.fretboard_state.ghost_notes.is_empty() {
@@ -289,10 +297,9 @@ impl Application {
             && self.fretboard_mode == FretboardMode::Song
             && self.fretboard_state.ghost_notes.is_empty()
         {
-            self.fretboard_state.set_ghost_notes(
-                SMOKE_ON_THE_WATER.notes[self.song_note_index % SMOKE_ON_THE_WATER.notes.len()]
-                    .to_vec(),
-            );
+            let song = &SONGS[self.current_song_index];
+            self.fretboard_state
+                .set_ghost_notes(song.notes[self.song_note_index % song.notes.len()].to_vec());
             self.song_note_index += 1;
         }
 
@@ -321,11 +328,12 @@ impl Application {
     }
 
     pub fn handle_press(&mut self, button: Button) {
-        if button == Button::Both
-            && self.tab == Tab::Fretboard
-            && self.fretboard_mode == FretboardMode::Scale
-        {
-            self.handle_event(Event::ToggleRootNote);
+        if button == Button::Both && self.tab == Tab::Fretboard {
+            if self.fretboard_mode == FretboardMode::Scale {
+                self.handle_event(Event::ToggleRootNote);
+            } else if self.fretboard_mode == FretboardMode::Song {
+                self.toggle_current_song();
+            }
             return;
         }
 

@@ -7,7 +7,7 @@ use crate::{
     app::{Application, FretboardMode, Tab, MAX_RANDOM_INTERVAL},
     MAX_ADC_VALUE,
 };
-use tuitar_core::{songs::SMOKE_ON_THE_WATER, ui::*};
+use tuitar_core::{songs::*, ui::*};
 
 const LOGO_ASCII: &str = r#"
               ████  █████    
@@ -127,7 +127,7 @@ impl Application {
                 } else if self.fretboard_mode == FretboardMode::Song {
                     let song_line = Line::from(vec![
                         "<".into(),
-                        SMOKE_ON_THE_WATER.name.yellow(),
+                        SONGS[self.current_song_index].name.yellow(),
                         ">".into(),
                     ]);
                     frame.render_widget(
