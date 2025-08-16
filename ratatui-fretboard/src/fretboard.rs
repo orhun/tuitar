@@ -12,6 +12,12 @@ use ratatui::{
 
 use crate::note::{Note, STANDARD_TUNING};
 
+/// Standard guitar fret markers (single dots).
+const FRET_MARKERS: [u8; 9] = [3, 5, 7, 9, 12, 15, 17, 19, 21];
+
+/// Special double-dot frets (e.g. 12, 24)
+const DOUBLE_MARKERS: [u8; 2] = [12, 24];
+
 /// State for the fretboard widget.
 #[derive(Clone, Debug)]
 pub struct FretboardState {
@@ -110,6 +116,10 @@ pub struct Fretboard {
     ghost_note_style: Style,
     /// The symbol used to represent ghost notes on the fretboard.
     ghost_note_symbol: char,
+    /// The symbol used to represent fret markers.
+    fret_marker_symbol: char,
+    /// The style for fret markers.
+    fret_marker_style: Style,
 }
 
 impl Default for Fretboard {
@@ -124,6 +134,8 @@ impl Default for Fretboard {
             active_string_style: Style::default().fg(Color::Yellow),
             ghost_note_style: Style::default().fg(Color::Blue),
             ghost_note_symbol: '✖',
+            fret_marker_symbol: '•',
+            fret_marker_style: Style::default().fg(Color::DarkGray),
         }
     }
 }
@@ -183,6 +195,18 @@ impl Fretboard {
         self.ghost_note_symbol = symbol;
         self
     }
+
+    /// Sets the symbol used to represent fret markers.
+    pub fn with_fret_marker_symbol(mut self, symbol: char) -> Self {
+        self.fret_marker_symbol = symbol;
+        self
+    }
+
+    /// Sets the style for fret markers.
+    pub fn with_fret_marker_style(mut self, style: Style) -> Self {
+        self.fret_marker_style = style;
+        self
+    }
 }
 
 impl StatefulWidget for &Fretboard {
@@ -193,7 +217,15 @@ impl StatefulWidget for &Fretboard {
         let available_width = area.width as usize;
         let fret_width = available_width / fret_labels.len();
 
-        // Draw top border
+        // Figure out where markers should go vertically
+        let mid_row = self.tuning.len() / 2;
+        let double_rows = if self.tuning.len() >= 4 {
+            vec![mid_row - 1, mid_row + 1]
+        } else {
+            vec![mid_row]
+        };
+
+        // Draw each string
         for (i, string_note) in self.tuning.iter().rev().enumerate() {
             let y = area.y + i as u16;
             let base_note = string_note.clone();
@@ -219,24 +251,33 @@ impl StatefulWidget for &Fretboard {
                 let highlight_active = state.active_notes.contains(&note);
                 let highlight_ghost = state.ghost_notes.contains(&note);
 
+                let has_marker = FRET_MARKERS.contains(fret_num);
+                let has_double = DOUBLE_MARKERS.contains(fret_num);
+
                 let symbol: Vec<Span> = if highlight_active || highlight_ghost {
-                    let fret_width = fret_width.max(1);
                     let left_pad = (fret_width - 1) / 2;
                     let right_pad = fret_width - 1 - left_pad;
                     vec![
                         Span::styled("─".repeat(left_pad), string_style),
-                        if j == 0 {
-                            Span::styled("─", string_style)
-                        } else if highlight_active {
+                        if highlight_active {
                             Span::styled(
                                 self.active_note_symbol.to_string(),
                                 self.active_note_style,
                             )
-                        } else if highlight_ghost {
-                            Span::styled(self.ghost_note_symbol.to_string(), self.ghost_note_style)
                         } else {
-                            unreachable!("Unexpected note state")
+                            Span::styled(self.ghost_note_symbol.to_string(), self.ghost_note_style)
                         },
+                        Span::styled("─".repeat(right_pad), string_style),
+                    ]
+                } else if has_marker
+                    && (!has_double && i == mid_row || has_double && double_rows.contains(&i))
+                {
+                    // Draw a centered fret marker dot
+                    let left_pad = (fret_width - 1) / 2;
+                    let right_pad = fret_width - 1 - left_pad;
+                    vec![
+                        Span::styled("─".repeat(left_pad), string_style),
+                        Span::styled(self.fret_marker_symbol.to_string(), self.fret_marker_style),
                         Span::styled("─".repeat(right_pad), string_style),
                     ]
                 } else {
@@ -283,7 +324,8 @@ mod tests {
         Fretboard::default()
             .with_active_note_style(Style::default())
             .with_fret_number_style(Style::default())
-            .with_note_name_style(Style::default()),
+            .with_note_name_style(Style::default())
+            .with_fret_marker_style(Style::default()),
         FretboardState {
             active_notes: vec![Note::A(4)],
             ghost_notes: Vec::new(),
@@ -293,7 +335,7 @@ mod tests {
             "E4 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼───┼───║ ",
             "B3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─⬤─┼───║ ",
             "G3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
-            "D3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
+            "D3 ║─┼───┼───┼─•─┼───┼─•─┼───┼─•─┼───┼─•─┼───┼───║ ",
             "A2 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
             "E2 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║ ",
             "     1   2   3   4   5   6   7   8   9  10  11  12 ",
@@ -304,7 +346,8 @@ mod tests {
         Fretboard::default()
             .with_active_note_style(Style::default())
             .with_fret_number_style(Style::default())
-            .with_note_name_style(Style::default()),
+            .with_note_name_style(Style::default())
+            .with_fret_marker_style(Style::default()),
         FretboardState {
             active_notes: vec![Note::F(4)],
             ghost_notes: Vec::new(),
@@ -314,7 +357,7 @@ mod tests {
             "E4 ║─┼──⬤──┼─────┼─────┼─────┼─────║",
             "B3 ║─┼─────┼─────┼─────┼─────┼─────║",
             "G3 ║─┼─────┼─────┼─────┼─────┼─────║",
-            "D3 ║─┼─────┼─────┼─────┼─────┼─────║",
+            "D3 ║─┼─────┼─────┼──•──┼─────┼──•──║",
             "A2 ║─┼─────┼─────┼─────┼─────┼─────║",
             "E2 ║─┼─────┼─────┼─────┼─────┼─────║",
             "     1     2     3     4     5     6",
@@ -335,7 +378,8 @@ mod tests {
         .with_active_note_style(Style::default())
         .with_fret_number_style(Style::default())
         .with_note_name_style(Style::default())
-        .with_active_string_style(Style::default()),
+        .with_active_string_style(Style::default())
+        .with_fret_marker_style(Style::default()),
         FretboardState {
             active_notes: vec![Note::F(2)],
             ghost_notes: Vec::new(),
@@ -355,7 +399,9 @@ mod tests {
         }
         .with_active_note_style(Style::default())
         .with_fret_number_style(Style::default())
-        .with_note_name_style(Style::default()),
+        .with_note_name_style(Style::default())
+        .with_active_string_style(Style::default())
+        .with_fret_marker_style(Style::default()),
         FretboardState {
             active_notes: vec![Note::F(3)],
             ghost_notes: Vec::new(),
@@ -363,7 +409,7 @@ mod tests {
         },
         Buffer::with_lines([
             "D3 ║─┼──⬤───┼──────║    ",
-            "A2 ║─┼──────┼──────║    ",
+            "A2 ║─┼──•───┼──────║    ",
             "     3      4      5    ",
             "                        ",
         ])
@@ -376,7 +422,9 @@ mod tests {
         }
         .with_active_note_style(Style::default())
         .with_fret_number_style(Style::default())
-        .with_note_name_style(Style::default()),
+        .with_note_name_style(Style::default())
+        .with_active_string_style(Style::default())
+        .with_fret_marker_style(Style::default()),
         FretboardState {
             active_notes: vec![Note::E(3)],
             ghost_notes: Vec::new(),
@@ -385,7 +433,7 @@ mod tests {
         Buffer::with_lines([
             "D3 ║─┼──────┼──⬤───┼──────║       ",
             "A2 ║─┼──────┼──────┼──────║       ",
-            "E2 ║─┼──────┼──────┼──────║       ",
+            "E2 ║─┼──────┼──────┼──•───║       ",
             "B1 ║─┼──────┼──────┼──────║       ",
             "     1      2      3      4       ",
             "                                  ",
@@ -422,7 +470,9 @@ mod tests {
         }
         .with_active_note_style(Style::default())
         .with_fret_number_style(Style::default())
-        .with_note_name_style(Style::default()),
+        .with_note_name_style(Style::default())
+        .with_active_string_style(Style::default())
+        .with_fret_marker_style(Style::default()),
         FretboardState {
             active_notes: vec![Note::FSharp(4), Note::F(3)],
             ghost_notes: Vec::new(),
@@ -431,9 +481,9 @@ mod tests {
         Buffer::with_lines([
             "E4 ║─┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
             "B3 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
-            "G3 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
-            "D3 ║─┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────║",
-            "A2 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "G3 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼──•──┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
+            "D3 ║─┼─────┼─────┼──⬤──┼─────┼──•──┼─────┼──•──┼─────┼──•──┼─────┼─────┼─────┼─────┼─────┼──•──┼──⬤──┼──•──┼─────┼──•──║",
+            "A2 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼──•──┼─────┼─────┼─────┼─────┼─────┼─────┼─────║",
             "E2 ║─┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼──⬤──┼─────┼─────┼─────┼─────┼─────┼─────║",
             "     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20",
         ])
@@ -459,7 +509,8 @@ mod tests {
     .with_fret_number_style(Style::default())
     .with_note_name_style(Style::default())
     .with_ghost_note_style(Style::default())
-    .with_active_string_style(Style::default()),
+    .with_active_string_style(Style::default())
+    .with_fret_marker_style(Style::default()),
     FretboardState {
         active_notes: vec![
             Note::C(3),
@@ -483,16 +534,16 @@ mod tests {
         frets: 0..=16,
     },
     Buffer::with_lines([
-        "D0 ║─┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",
-        "G0 ║─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",
-        "C0 ║─┼───┼─⬤─┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼──",
-        "F0 ║─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼──",
-        "B0 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼──",
-        "E1 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼──",
-        "A1 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼─✖",
-        "D2 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼─✖─┼─⬤─┼───┼─✖─┼───┼──",
-        "G2 ║─┼───┼───┼───┼─✖─┼─⬤─┼───┼─✖─┼───┼───┼───┼───┼───┼───┼─✖",
-        "C3 ║─┼───┼─✖─┼───┼───┼───┼───┼───┼───┼─✖─┼───┼───┼───┼───┼──",
+        "D0 ║⬤┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",
+        "G0 ║⬤┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤",
+        "C0 ║⬤┼───┼─⬤─┼───┼───┼─⬤─┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼──",
+        "F0 ║⬤┼───┼─⬤─┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼───┼──",
+        "B0 ║⬤┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼─•─┼───┼──",
+        "E1 ║⬤┼───┼───┼─•─┼───┼─⬤─┼───┼─•─┼───┼─•─┼─⬤─┼───┼───┼───┼──",
+        "A1 ║⬤┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼─⬤─┼───┼─•─┼───┼─✖",
+        "D2 ║⬤┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼─✖─┼─⬤─┼───┼─✖─┼───┼──",
+        "G2 ║⬤┼───┼───┼───┼─✖─┼─⬤─┼───┼─✖─┼───┼───┼───┼───┼───┼───┼─✖",
+        "C3 ║⬤┼───┼─✖─┼───┼───┼───┼───┼───┼───┼─✖─┼───┼───┼───┼───┼──",
         "     1   2   3   4   5   6   7   8   9  10  11  12  13  14  ",
         "                                                            ",
     ])
