@@ -285,7 +285,7 @@ impl Application {
         if self.tab == Tab::Fretboard && self.fretboard_mode == FretboardMode::Random {
             if self.fretboard_state.ghost_notes.is_empty() {
                 self.fretboard_state
-                    .set_ghost_note(utils::generate_random_note(0..=self.state.fret_count));
+                    .set_ghost_note(utils::generate_random_note(&self.fretboard_state.frets));
                 self.last_random = Instant::now();
             } else if self.last_random.elapsed().as_millis() as u64 > MAX_RANDOM_INTERVAL {
                 self.random_mode_points = self.random_mode_points.saturating_sub(1);
