@@ -4,6 +4,8 @@
     <br>
     <b>"Learning how to play guitar with a TUI - hence <em>Tuitar</em>."</b>
     <br>
+    <b> [ </b><em>Written in Rust &amp; built with <a href="https://ratatui.rs">Ratatui</a></em><b> ] </b>
+    <br>
     <br>
     <a href="https://github.com/orhun/tuitar/releases">
         <img src="https://img.shields.io/github/v/release/orhun/tuitar?color=000000">
@@ -24,7 +26,22 @@
 
 ---
 
-**Tuitar** is a terminal-based guitar training tool that also runs standalone on ESP32 hardware.
+![todo-demo-video](demo)
+
+**Tuitar** is a terminal-based guitar training tool that runs standalone on ESP32 hardware. See the [features](#features).
+
+Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](./hardware/README.md) sections for more details.
+
+> [!NOTE]  
+> **Tuitar** is currently in prototype stage but you can still try it out and contribute to the project.
+>
+> The plan is to feature it on [CrowdSupply](https://crowdsupply.com) once the firmware and hardware are stable. Let me know if you are interested in supporting the project or have [any feedback](https://github.com/orhun/tuitar/issues)!
+>
+> All of this is built on [livestream](https://www.youtube.com/playlist?list=PLxqHy2Zr5TiUiLYsNbFF8ACf_Er_7MgP-) as a part of a series called **Becoming a Musician** (100+ hours of content!)
+
+## Features
+
+### Tuning
 
 It offers real-time visualizations, including:
 
@@ -32,20 +49,23 @@ It offers real-time visualizations, including:
 - **Waveform, frequency & gain**: Watch the sound as it moves.
 - **Fretboard**: See detected notes mapped directly onto the guitar neck for instant feedback.
 
-Fretboard practice modes:
+### Tracking
 
-1. Live mode: Show the currently played note.
-2. Scale mode: Display all notes in a selected scale.
+Learn songs:
 
-Fretboard game modes where you can test your skills:
+Learn scales:
 
-1. Random mode: Show a random note on the fretboard.
-2. Song mode: Display a song's notes on the fretboard.
+Practice speed:
 
-> [!NOTE]
-> Building all of this [on livestream](https://www.youtube.com/@orhundev/streams).
+## Input modes
 
-## Demo
+## Controls
+
+## Terminal
+
+## Architecture
+
+### WIP Demos
 
 With microphone input:
 
@@ -54,3 +74,12 @@ https://github.com/user-attachments/assets/1922a316-57ff-4f3d-92eb-5ba5ff0dfdd8
 With jack input:
 
 https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0
+
+> [!NOTE]
+> Building all of this [on livestream](https://www.youtube.com/@orhundev/streams).
+
+## Contributing
+
+## License
+
+## Copyright
