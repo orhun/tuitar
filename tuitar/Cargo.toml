@@ -1,8 +1,10 @@
 [package]
 name = "tuitar"
+description = "A TUI guitar tuner"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+license.workspace = true
 
 [dependencies]
 tuitar-core.workspace = true

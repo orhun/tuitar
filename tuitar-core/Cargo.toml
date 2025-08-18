@@ -1,8 +1,10 @@
 [package]
 name = "tuitar-core"
+description = "Core library for Tuitar"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+license.workspace = true
 
 [features]
 logging = ["log"]

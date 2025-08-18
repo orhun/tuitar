@@ -2,7 +2,7 @@
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-dark.png#gh-dark-mode-only" width="400"></a>
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-light.png#gh-light-mode-only" width="400"></a>
     <br>
-    <b>"Learning how to play guitar with a TUI - hence <em>Tuitar</em>."</b>
+    <b>Learning how to play guitar with a TUI - hence <em>Tuitar</em>.</b>
     <br>
     <b> [ </b>Written in Rust &amp; built with <a href="https://ratatui.rs">Ratatui</a></em> ] </b>
     <br>
@@ -44,6 +44,33 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 > The plan is to feature it on [CrowdSupply](https://crowdsupply.com) once the firmware and hardware are stable. Let me know if you are interested in supporting the project or have [any feedback](https://github.com/orhun/tuitar/issues)!
 >
 > All of this is built on livestream as a part of a series called [Becoming a Musician](https://www.youtube.com/playlist?list=PLxqHy2Zr5TiUiLYsNbFF8ACf_Er_7MgP-) (100+ hours of content!)
+
+<details>
+  <summary>Table of Contents</summary>
+
+<!-- vim-markdown-toc GFM -->
+
+- [Features](#features)
+  - [Tuning](#tuning)
+  - [Fretboard Tracking](#fretboard-tracking)
+  - [Signal Analysis](#signal-analysis)
+    - [Waveform](#waveform)
+    - [Spectrum](#spectrum)
+- [Input modes](#input-modes)
+- [FPS](#fps)
+- [Controls](#controls)
+  - [Global](#global)
+  - [Fretboard](#fretboard)
+  - [Frequency/Spectrum/Waveform](#frequencyspectrumwaveform)
+- [Terminal](#terminal)
+- [Architecture](#architecture)
+- [Old Demos](#old-demos)
+- [License & Contributions](#license--contributions)
+- [Copyright](#copyright)
+
+<!-- vim-markdown-toc -->
+
+</details>
 
 ## Features
 
@@ -147,7 +174,7 @@ The controls are context-sensitive, meaning they change their function based on 
 | Mode + Menu | Short press | Toggle root note or song                                 |
 | Ctrl knob   | Turn        | Scroll fretboard                                         |
 
-## Frequency/Spectrum/Waveform
+### Frequency/Spectrum/Waveform
 
 | Control     | Action      | Function                        |
 | ----------- | ----------- | ------------------------------- |
@@ -185,7 +212,7 @@ The codebase consists of the following crates:
 
 The dependency relationship is as follows:
 
-```text
+```
 tuitar-core
  └── ratatui-fretboard
 

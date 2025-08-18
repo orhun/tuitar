@@ -1,8 +1,10 @@
 [package]
 name = "tuitar-firmware"
+description = "Tuitar firmware for ESP32 devices"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+license.workspace = true
 
 [features]
 experimental = ["esp-idf-svc/experimental"]
