@@ -4,7 +4,7 @@
 
 Terminal user interface for [Tuitar](https://github.com/orhun/tuitar).
 
-![demo](./assets/demo.gif)
+<img src="https://github.com/orhun/tuitar/blob/main/tuitar/assets/demo.gif?raw=true" height="500">
 
 It can be used for:
 
