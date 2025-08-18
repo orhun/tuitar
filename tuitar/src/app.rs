@@ -35,6 +35,7 @@ impl Application {
             12,
             PixelSize::Full,
             5,
+            Some(5),
         );
 
         Self {
@@ -75,8 +76,8 @@ impl Application {
         frame.render_widget(&self.fps_widget, frame.area());
 
         let area = area.inner(Margin {
-            horizontal: 1,
-            vertical: 0,
+            horizontal: 0,
+            vertical: 1,
         });
 
         match self.tab {
@@ -87,12 +88,13 @@ impl Application {
                 (i16::MIN as f64, i16::MAX as f64),
                 ("Amplitudes", "Time(s)"),
             ),
-            1 => draw_frequency(frame, area, &self.state),
+            1 => {
+                draw_frequency(frame, area, &self.state);
+                draw_note_name(frame, area, &self.state);
+            }
             2 => draw_dbfs_spectrum(frame, area, &self.state, ("Level (dBFS)", "Frequency (Hz)")),
             _ => {}
         }
-
-        draw_note_name(frame, area, &self.state);
 
         let fretboard_width = 51;
         let mut area = frame.area().offset(Offset {

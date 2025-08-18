@@ -1,9 +1,5 @@
-mod app;
-mod input;
-mod transform;
-
-use app::Application;
 use ratatui::crossterm::event;
+use tuitar::app::Application;
 
 fn main() {
     let mut app = Application::new();

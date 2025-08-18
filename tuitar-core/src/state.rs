@@ -6,7 +6,7 @@ use tui_big_text::PixelSize;
 
 use crate::transform::Transformer;
 
-const MAX_HISTORY: usize = 2;
+const DEFAULT_MAX_HISTORY: usize = 2;
 const MIN_FREQ_HZ: f64 = 80.0;
 const MAX_FREQ_HZ: f64 = 1320.0;
 
@@ -39,6 +39,9 @@ pub struct State<T: Transformer> {
 
     /// A history of recent notes.
     note_history: VecDeque<NoteHistory>,
+
+    /// The maximum number of notes to keep in history.
+    pub max_history: usize,
 }
 
 impl<T: Transformer> State<T> {
@@ -48,6 +51,7 @@ impl<T: Transformer> State<T> {
         fret_count: u8,
         text_size: PixelSize,
         bottom_padding: u16,
+        max_history: Option<usize>,
     ) -> Self {
         Self {
             transform,
@@ -56,7 +60,8 @@ impl<T: Transformer> State<T> {
             fret_count,
             text_size,
             bottom_padding,
-            note_history: VecDeque::with_capacity(MAX_HISTORY),
+            note_history: VecDeque::with_capacity(max_history.unwrap_or(DEFAULT_MAX_HISTORY)),
+            max_history: max_history.unwrap_or(DEFAULT_MAX_HISTORY),
         }
     }
 
@@ -82,7 +87,7 @@ impl<T: Transformer> State<T> {
                 name,
                 fundamental_frequency,
             });
-            if self.note_history.len() > MAX_HISTORY {
+            if self.note_history.len() > self.max_history {
                 self.note_history.pop_front();
             }
         }
