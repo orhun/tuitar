@@ -21,6 +21,12 @@ pub struct Application {
     tab: usize,
 }
 
+impl Default for Application {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Application {
     pub fn new() -> Self {
         let transform = Transform::new();

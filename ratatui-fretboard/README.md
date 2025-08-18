@@ -4,14 +4,14 @@ A Ratatui widget for displaying musical notes and their positions on a guitar fr
 
 ## Example
 
-```rust
+```rust,ignore
 let fretboard = Fretboard::default();
 let mut state = FretboardState::default();
 state.set_active_note(Note::A(4));
 frame.render_stateful_widget(fretboard, area, &mut state);
 ```
 
-```
+```text,ignore
 E4 ║─┼───┼───┼───┼───┼─⬤─┼───┼───┼───┼───┼───┼───║
 B3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─⬤─┼───║
 G3 ║─┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───║

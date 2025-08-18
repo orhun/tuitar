@@ -70,7 +70,7 @@ impl ButtonState {
         } else if let Some(pressed_at) = self.pressed_at.take() {
             // Button just released
             let duration = pressed_at.elapsed().as_millis() as u64;
-            let press_type = if duration >= 500 && duration < 2000 {
+            let press_type = if (500..2000).contains(&duration) {
                 Some(ButtonPressType::Long)
             } else if duration < 500 {
                 Some(ButtonPressType::Short)
@@ -361,7 +361,6 @@ impl Application {
         {
             self.current_scale = self.current_scale.next();
             self.set_scale_notes();
-            return;
         }
     }
 
