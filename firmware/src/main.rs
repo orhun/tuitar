@@ -5,6 +5,7 @@ mod utils;
 
 use std::time::Instant;
 
+use display_interface_spi::SPIInterface;
 use esp_idf_svc::hal::adc::ADC1;
 use esp_idf_svc::hal::delay::Ets;
 use esp_idf_svc::hal::gpio::{ADCPin, Gpio27, Gpio33, InputPin, OutputPin};
@@ -26,11 +27,12 @@ use esp_idf_svc::hal::{
     spi::{SpiConfig, SpiDeviceDriver},
     units::*,
 };
+use ili9341::{DisplaySize240x320, Ili9341, Orientation};
 use mousefood::prelude::*;
-use st7735_lcd::{Orientation, ST7735};
+use st7735_lcd::ST7735;
 
 use app::{Application, Button, ButtonState, Event, InputMode};
-use transform::Transform;
+use transform::{Transform, FFT_SIZE};
 
 pub(crate) const MAX_ADC_VALUE: u16 = 3129;
 
@@ -65,9 +67,9 @@ pub fn init_display<'a>(
 
     let mut delay = FreeRtos;
     display.init(&mut delay).unwrap();
-    display
-        .set_orientation(&Orientation::LandscapeSwapped)
-        .unwrap();
+    // display
+    //     .set_orientation(&Orientation::LandscapeSwapped)
+    //     .unwrap();
 
     Ok(display)
 }
@@ -98,22 +100,31 @@ fn main() -> anyhow::Result<()> {
 
     let peripherals = Peripherals::take()?;
 
-    let mut display = init_display(
-        // SPI2 is used for the display
-        peripherals.spi2,
-        // HSPI SCK — default SPI2 clock pin, safe at boot
-        peripherals.pins.gpio14,
-        // HSPI MOSI — default SPI2 data pin, safe at boot
-        peripherals.pins.gpio13,
-        // MISO not used for display
-        None::<esp_idf_svc::hal::gpio::Gpio0>,
-        // CS — general-purpose pin, safe at boot
-        Some(peripherals.pins.gpio25),
-        // DC (AO) — general-purpose pin, safe at boot
-        peripherals.pins.gpio27,
-        // RESET — unused GPIO, safe and stable
-        peripherals.pins.gpio33,
-    )?;
+    let spi = peripherals.spi2; // SPI2 is used for the display
+
+    let dc = peripherals.pins.gpio27; // DC pin for display
+    let mosi = peripherals.pins.gpio13; // MOSI pin for display
+    let sclk = peripherals.pins.gpio14; // SCK pin for display
+    let cs = Some(peripherals.pins.gpio25); // CS pin for display
+    let rst = peripherals.pins.gpio33; // Reset pin for display
+    let sdi = None::<esp_idf_svc::hal::gpio::Gpio0>; // MISO not used for display
+
+    let rst = PinDriver::output(rst)?;
+    let dc = PinDriver::output(dc)?;
+    let driver_config = Default::default();
+    let spi_config = SpiConfig::new().baudrate(40u32.MHz().into());
+    let spi = SpiDeviceDriver::new_single(spi, sclk, mosi, sdi, cs, &driver_config, &spi_config)?;
+
+    let di = SPIInterface::new(spi, dc);
+
+    let mut display = Ili9341::new(
+        di,
+        rst,
+        &mut FreeRtos,
+        Orientation::LandscapeFlipped,
+        DisplaySize240x320,
+    )
+    .unwrap();
 
     let mut mode_button = PinDriver::input(peripherals.pins.gpio21).unwrap();
     mode_button
@@ -134,18 +145,17 @@ fn main() -> anyhow::Result<()> {
     let mut mic_adc_channel = init_adc_channel(&adc1_driver, peripherals.pins.gpio32)?;
     let mut pot = init_adc_channel(&adc1_driver, peripherals.pins.gpio39)?;
 
-    let buffer_size = 1024;
-    let mut samples = Box::new([0i16; 1024]);
+    let mut samples = Box::new([0i16; FFT_SIZE]);
 
     let backend = EmbeddedBackend::new(&mut display, EmbeddedBackendConfig::default());
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = Application::new(buffer_size);
+    let mut app = Application::new(FFT_SIZE);
 
     while app.is_running {
         let instant = Instant::now();
         let mut sample_len = 0;
-        while sample_len < buffer_size {
+        while sample_len < FFT_SIZE {
             let raw_sample = match app.input_mode {
                 InputMode::Mic => mic_adc_channel.read().unwrap_or(0),
                 InputMode::Jack => jack_adc_channel.read().unwrap_or(0),

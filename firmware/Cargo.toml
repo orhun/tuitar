@@ -16,16 +16,20 @@ tui-big-text.workspace = true
 pitchy.workspace = true
 ratatui-fretboard.workspace = true
 log = { workspace = true, optional = true }
-esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+esp-idf-svc = { version = "0.51", default-features = false, features = ["std", "binstart" ] }
 embedded-graphics = "0.8.1"
 mipidsi = "0.9.0"
-embedded-hal = "1.0.0"
-mousefood = "0.2.1"
+mousefood = { path = "/home/orhun/gh/mousefood" }
 microfft = "0.6.0"
 num-complex = "0.4.6"
 st7735-lcd = "0.10.0"
 anyhow = "1.0.98"
 fastrand = "2.3.0"
+ili9341 = "0.6.0"
+display-interface = "0.5"
+embedded-hal = "1.0.0"
+display-interface-spi = "0.5.0"
+esp-alloc = "0.8.0"
 
 [build-dependencies]
 embuild = { version = "0.33", features = ["espidf"] }
