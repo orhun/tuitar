@@ -23,7 +23,7 @@ ratatui-fretboard = { path = "ratatui-fretboard" }
 log = "0.4"
 
 [profile.release]
-opt-level = 3
+opt-level = 1
 
 [profile.dev]
 debug = true    # Symbols are nice and they don't increase the size on Flash
