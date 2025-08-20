@@ -16,7 +16,7 @@ tui-big-text.workspace = true
 pitchy.workspace = true
 ratatui-fretboard.workspace = true
 log = { workspace = true, optional = true }
-esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+esp-idf-svc = { version = "0.51", features = ["critical-section"] }
 embedded-graphics = "0.8.1"
 mipidsi = "0.9.0"
 embedded-hal = "1.0.0"
