@@ -94,7 +94,7 @@ pub fn draw_frequency<T: Transformer>(frame: &mut Frame<'_>, area: Rect, state: 
 
     let scaled_points: Vec<f64> = filtered_points
         .iter()
-        .map(|&x| ((x / max_value).clamp(0.0, 1.0)))
+        .map(|&x| (x / max_value).clamp(0.0, 1.0))
         .collect();
 
     let bar_graph = BarGraph::new(scaled_points)

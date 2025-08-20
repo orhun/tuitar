@@ -157,24 +157,23 @@ fn main() {
         song_idents.push(ident.to_string());
 
         output.push_str(&format!(
-            "pub const {}: Song = Song {{\n    name: {:?},\n    notes: &[\n",
-            ident, name
+            "pub const {ident}: Song = Song {{\n    name: {name:?},\n    notes: &[\n"
         ));
         for beat in parsed_notes {
             output.push_str("        &[");
             for note in beat {
-                output.push_str(&format!("Note::{:?}, ", note));
+                output.push_str(&format!("Note::{note:?}, "));
             }
             output.push_str("],\n");
         }
         output.push_str("    ],\n};\n\n");
 
-        println!("cargo:rerun-if-changed={}", path);
+        println!("cargo:rerun-if-changed={path}");
     }
 
     output.push_str("pub const SONGS: &[Song] = &[\n");
     for ident in song_idents {
-        output.push_str(&format!("    {},\n", ident));
+        output.push_str(&format!("    {ident},\n"));
     }
     output.push_str("];\n");
 
