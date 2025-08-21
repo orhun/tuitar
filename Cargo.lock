@@ -2140,17 +2140,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
-name = "st7735-lcd"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f62bd63569c4bab37b9b8c6cfd72ed6281701cff08eec80bc178f3e56df2872"
-dependencies = [
- "embedded-graphics-core",
- "embedded-hal 1.0.0",
- "nb 1.1.0",
-]
-
-[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2453,7 +2442,6 @@ dependencies = [
  "num-complex 0.4.6",
  "pitchy",
  "ratatui-fretboard",
- "st7735-lcd",
  "tui-big-text",
  "tuitar-core",
 ]

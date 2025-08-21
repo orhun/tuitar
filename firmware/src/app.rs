@@ -193,7 +193,7 @@ impl Application {
             is_running: true,
             state,
             input_mode: InputMode::default(),
-            control_value: MAX_ADC_VALUE / 2,
+            control_value: 1600,
             fps_widget: FpsWidget::default().with_style(
                 Style::default()
                     .fg(Color::Gray)
