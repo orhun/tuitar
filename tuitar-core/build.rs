@@ -11,6 +11,12 @@ const SONGS: &[(&str, &str, &str, SongFormat)] = &[
         SongFormat::Midi(0),
     ),
     (
+        "MY_OWN_SUMMER",
+        "My Own Summer",
+        "songs/my-own-summer.mid",
+        SongFormat::Midi(1),
+    ),
+    (
         "SMOKE_ON_THE_WATER",
         "Smoke on the Water",
         "songs/deep-purple-smoke_on_the_water.gp3",
