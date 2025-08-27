@@ -2,6 +2,7 @@ use std::{fmt::Display, time::Instant};
 
 use mousefood::prelude::*;
 use ratatui_fretboard::{note::Note, scale::Scale, FretboardState};
+use tachyonfx::{fx, Effect, Interpolation, Motion};
 use tui_big_text::PixelSize;
 use tuitar_core::{fps::FpsWidget, songs::*};
 
@@ -182,6 +183,10 @@ pub struct Application {
     pub song_note_index: usize,
     pub random_mode_points: usize,
     pub last_random: Instant,
+    pub intro_effect: Effect,
+    pub menu_effect: Effect,
+    pub input_mode_effect: Effect,
+    pub mode_effect: Effect,
 }
 
 impl Application {
@@ -210,6 +215,24 @@ impl Application {
             song_note_index: 0,
             random_mode_points: 0,
             last_random: Instant::now(),
+            intro_effect: fx::coalesce((800, Interpolation::SineOut)),
+            menu_effect: fx::slide_in(
+                Motion::LeftToRight,
+                10,
+                0,
+                Color::Black,
+                (800, Interpolation::Linear),
+            ),
+            input_mode_effect: fx::hsl_shift(
+                Some([0.0, 40.0, 30.0]),
+                Some([-10.0, -60.0, -60.0]),
+                (1000, Interpolation::Linear),
+            ),
+            mode_effect: fx::hsl_shift(
+                Some([0.0, 40.0, 30.0]),
+                Some([-10.0, -60.0, -60.0]),
+                (1000, Interpolation::Linear),
+            ),
         }
     }
 
@@ -220,6 +243,7 @@ impl Application {
             Tab::Spectrum => Tab::Fretboard,
             Tab::Fretboard => Tab::Frequency,
         };
+        self.menu_effect.reset();
     }
 
     pub fn switch_input_mode(&mut self) {
@@ -227,6 +251,7 @@ impl Application {
             InputMode::Mic => InputMode::Jack,
             InputMode::Jack => InputMode::Mic,
         };
+        self.input_mode_effect.reset();
     }
 
     pub fn switch_fretboard_mode(&mut self) {
@@ -249,6 +274,7 @@ impl Application {
                 self.fretboard_mode = FretboardMode::Live;
             }
         }
+        self.mode_effect.reset();
     }
 
     pub fn set_scale_notes(&mut self) {

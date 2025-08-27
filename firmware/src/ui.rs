@@ -2,6 +2,7 @@ use mousefood::ratatui::layout::Offset;
 use mousefood::ratatui::widgets::Paragraph;
 use mousefood::{prelude::*, ratatui::widgets::LineGauge};
 use ratatui_fretboard::Fretboard;
+use tachyonfx::{Duration, EffectRenderer};
 
 use crate::{
     app::{Application, FretboardMode, Tab, MAX_RANDOM_INTERVAL},
@@ -35,6 +36,8 @@ impl Application {
             // One line above the bottom of the screen
             Rect::new(area.left(), area.bottom().saturating_sub(1), area.width, 1),
         );
+
+        frame.render_effect(&mut self.intro_effect, area, Duration::from_millis(100));
     }
 
     fn render_fps(&mut self, frame: &mut Frame<'_>) {
@@ -170,11 +173,37 @@ impl Application {
                 frame_area.width,
                 1,
             ),
-        )
+        );
+    }
+
+    pub fn render_effects(&mut self, frame: &mut Frame<'_>) {
+        if !self.menu_effect.done() {
+            frame.render_effect(
+                &mut self.menu_effect,
+                frame.area(),
+                Duration::from_millis(200),
+            );
+        }
+
+        if !self.input_mode_effect.done() {
+            frame.render_effect(
+                &mut self.input_mode_effect,
+                frame.area(),
+                Duration::from_millis(100),
+            );
+        }
+
+        if !self.mode_effect.done() {
+            frame.render_effect(
+                &mut self.mode_effect,
+                frame.area(),
+                Duration::from_millis(400),
+            );
+        }
     }
 
     pub fn render(&mut self, frame: &mut Frame<'_>) {
-        if self.splash_timestamp.elapsed().as_secs() < 1 {
+        if self.splash_timestamp.elapsed().as_millis() < 1500 {
             self.render_splash(frame);
             return;
         }
@@ -182,5 +211,6 @@ impl Application {
         self.render_menus(frame);
         self.render_fps(frame);
         self.render_input_mode(frame);
+        self.render_effects(frame);
     }
 }
