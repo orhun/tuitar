@@ -3,6 +3,7 @@ mod transform;
 mod ui;
 mod utils;
 
+use std::num::NonZeroUsize;
 use std::time::Instant;
 
 use esp_idf_svc::hal::adc::ADC1;
@@ -95,6 +96,8 @@ fn main() -> anyhow::Result<()> {
 
     // Bind the log crate to the ESP Logging facilities
     esp_idf_svc::log::EspLogger::initialize_default();
+
+    Layout::init_cache(NonZeroUsize::new(20).unwrap()); // default is 500
 
     let peripherals = Peripherals::take()?;
 
