@@ -4,7 +4,7 @@
     <br>
     <b>Learning how to play guitar with a TUI - hence <em>Tuitar</em>.</b>
     <br>
-    <b> [ </b>Written in Rust &amp; built with <a href="https://ratatui.rs">Ratatui</a></em> ] </b>
+    Written in Rust &amp; built with <a href="https://ratatui.rs">Ratatui</a></em>
     <br>
     <br>
     <a href="https://github.com/orhun/tuitar/releases">
@@ -26,7 +26,7 @@
 
 ---
 
-![todo-demo-video](demo)
+<!-- ![todo-demo-video](demo) -->
 
 <p align="center">
 
