@@ -55,7 +55,9 @@ pub fn init_display<'a>(
     let rst = PinDriver::output(rst)?;
     let dc = PinDriver::output(dc)?;
     let driver_config = Default::default();
-    let spi_config = SpiConfig::new().baudrate(40u32.MHz().into());
+    let spi_config = SpiConfig::new()
+        .baudrate(80u32.MHz().into())
+        .write_only(true);
     // let spi_config = SpiConfig::new().baudrate(26.MHz().into()).data_mode(embedded_hal::spi::MODE_3);
     let spi = SpiDeviceDriver::new_single(spi, sclk, sdo, sdi, cs, &driver_config, &spi_config)?;
     let rgb = true;

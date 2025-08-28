@@ -26,9 +26,6 @@ log = "0.4"
 [profile.release]
 opt-level = 3
 
-[profile.release.package."tuitar-firmware"]
-opt-level = 1
-
 [profile.dev]
 debug = true    # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
