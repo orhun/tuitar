@@ -215,7 +215,7 @@ impl Application {
             song_note_index: 0,
             random_mode_points: 0,
             last_random: Instant::now(),
-            intro_effect: fx::coalesce((800, Interpolation::SineOut)),
+            intro_effect: fx::coalesce((800, Interpolation::ExpoOut)),
             menu_effect: fx::slide_in(
                 Motion::LeftToRight,
                 10,

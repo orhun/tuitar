@@ -37,7 +37,7 @@ impl Application {
             Rect::new(area.left(), area.bottom().saturating_sub(1), area.width, 1),
         );
 
-        frame.render_effect(&mut self.intro_effect, area, Duration::from_millis(100));
+        frame.render_effect(&mut self.intro_effect, area, Duration::from_millis(400));
     }
 
     fn render_fps(&mut self, frame: &mut Frame<'_>) {
@@ -183,6 +183,7 @@ impl Application {
                 frame.area(),
                 Duration::from_millis(200),
             );
+            return;
         }
 
         if !self.input_mode_effect.done() {
@@ -191,6 +192,7 @@ impl Application {
                 frame.area(),
                 Duration::from_millis(100),
             );
+            return;
         }
 
         if !self.mode_effect.done() {
