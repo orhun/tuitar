@@ -60,8 +60,8 @@ impl Recorder {
 
                 let mut chosen_config = None;
                 match device.supported_input_configs() {
-                    Ok(mut configs) => {
-                        while let Some(range) = configs.next() {
+                    Ok(configs) => {
+                        for range in configs {
                             let config = range.with_max_sample_rate();
 
                             if config.sample_format() == SampleFormat::I16 {
