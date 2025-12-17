@@ -268,11 +268,19 @@ Here are some demos from the development phase.
 
 **Tuitar** running on ESP32 T-Display:
 
-<video src="https://github.com/user-attachments/assets/1922a316-57ff-4f3d-92eb-5ba5ff0dfdd8">
+<div align="center">
+
+<video src="https://github.com/user-attachments/assets/1922a316-57ff-4f3d-92eb-5ba5ff0dfdd8" alt="Tuitar on ESP32 T-Display">
+
+</div>
 
 With jack input:
 
-<video src="https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0">
+<div align="center">
+
+<video src="https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0" alt="Tuitar with jack input">
+
+</div>
 
 ## License & Contributions
 
