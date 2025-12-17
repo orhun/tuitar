@@ -79,7 +79,13 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 
 ## Promo Video
 
-[![promo video](assets/promo-video-thumbnail.png)](https://www.youtube.com/watch?v=tZm7cLaHAR0)
+<a href="https://www.youtube.com/watch?v=tZm7cLaHAR0" target="_blank" rel="noopener noreferrer">
+  <img
+    src="assets/promo-video-thumbnail.png"
+    alt="promo video"
+    style="width:90%;height:auto;"
+  />
+</a>
 
 ▶️ [**https://www.youtube.com/watch?v=tZm7cLaHAR0**](https://www.youtube.com/watch?v=tZm7cLaHAR0)
 
@@ -87,7 +93,15 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 
 **Tuitar** was presented for the first time at Rust Forge Conference in New Zealand.
 
-[![demo video](assets/live-demo-thumbnail.png)](https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s)
+<a href="https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s"
+   target="_blank"
+   rel="noopener noreferrer">
+<img
+    src="assets/live-demo-thumbnail.png"
+    alt="demo video"
+    style="width:90%;height:auto;"
+  />
+</a>
 
 ▶️ [**https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s**](https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s)
 
@@ -111,15 +125,7 @@ tuitar
 
 If you want the full experience, you can also [build the kit](./hardware/README.md), which looks like this:
 
-<p>
-
-<img align="left" src="./hardware/assets/pcb-5.jpg" width="400">
-
-<img align="right" src="./hardware/assets/pcb-6.jpg" width="400">
-
-</p>
-
-<br clear="both">
+<img src="./hardware/assets/pcb-5.jpg" width="400">
 
 ## Features
 
