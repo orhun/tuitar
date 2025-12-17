@@ -2,9 +2,9 @@
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-dark.png#gh-dark-mode-only" width="400"></a>
     <img src="https://raw.githubusercontent.com/orhun/tuitar/refs/heads/main/assets/tuitar-logo-light.png#gh-light-mode-only" width="400"></a>
     <br>
-    <b>Learning how to play guitar with a TUI - hence <em>Tuitar</em>.</b>
+    <b>A portable guitar training tool & DIY kit.</b>
     <br>
-    Written in Rust &amp; built with <a href="https://ratatui.rs">Ratatui</a></em>
+    <sup>Written in <a href="https://rust-lang.org/">Rust</a> &amp; built with <a href="https://ratatui.rs">Ratatui</a></sup></em>
     <br>
     <br>
     <a href="https://github.com/orhun/tuitar/releases">
@@ -26,15 +26,15 @@
 
 ---
 
-<!-- ![todo-demo-video](demo) -->
-
 <p align="center">
 
-<img src="./assets/tuitar-case.jpg" width="600">
+<img src="./assets/tuitar-pcb.jpg" width="600">
 
-**Tuitar** is a terminal-based guitar training tool that runs standalone on ESP32 hardware. See the [features](#features).
+_Learning how to play guitar with a TUI - hence "Tuitar"._
 
-Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](./hardware/README.md) sections for more details.
+**Tuitar** is a terminal-based guitar training tool that runs standalone on ESP32 hardware.  
+Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](./hardware/README.md) sections for more details.  
+[Click here to jump to the features](#features) ➡️
 
 </p>
 
@@ -44,25 +44,30 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 > The plan is to feature it on [CrowdSupply](https://crowdsupply.com) once the firmware and hardware are stable. Let me know if you are interested in supporting the project or have [any feedback](https://github.com/orhun/tuitar/issues)!
 >
 > All of this is built on livestream as a part of a series called [Becoming a Musician](https://www.youtube.com/playlist?list=PLxqHy2Zr5TiUiLYsNbFF8ACf_Er_7MgP-) (100+ hours of content!)
+>
+> Follow [@tuitardev](https://x.com/tuitardev) on X (Twitter) to not miss any updates!
 
 <details>
   <summary>Table of Contents</summary>
 
 <!-- vim-markdown-toc GFM -->
 
+- [Promo Video](#promo-video)
+- [Launch & Live Demo](#launch--live-demo)
+- [Try it out!](#try-it-out)
 - [Features](#features)
   - [Tuning](#tuning)
   - [Fretboard Tracking](#fretboard-tracking)
   - [Signal Analysis](#signal-analysis)
     - [Waveform](#waveform)
     - [Spectrum](#spectrum)
-- [Input modes](#input-modes)
-- [FPS](#fps)
+- [UI](#ui)
+  - [Input modes](#input-modes)
+  - [FPS](#fps)
 - [Controls](#controls)
   - [Global](#global)
   - [Fretboard](#fretboard)
   - [Frequency/Spectrum/Waveform](#frequencyspectrumwaveform)
-- [Terminal](#terminal)
 - [Architecture](#architecture)
 - [Old Demos](#old-demos)
 - [License & Contributions](#license--contributions)
@@ -72,13 +77,57 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 
 </details>
 
+## Promo Video
+
+[![promo video](assets/promo-video-thumbnail.png)](https://www.youtube.com/watch?v=tZm7cLaHAR0)
+
+▶️ [**https://www.youtube.com/watch?v=tZm7cLaHAR0**](https://www.youtube.com/watch?v=tZm7cLaHAR0)
+
+## Launch & Live Demo
+
+**Tuitar** was presented for the first time at Rust Forge Conference in New Zealand.
+
+[![demo video](assets/live-demo-thumbnail.png)](https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s)
+
+▶️ [**https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s**](https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s)
+
+## Try it out!
+
+**Tuitar** was originally designed to run in the terminal.
+
+So you can install the binary here:
+
+```sh
+cargo install tuitar --locked
+```
+
+And run it with:
+
+```sh
+tuitar
+```
+
+<img src="./tuitar/assets/demo.gif" height="400">
+
+If you want the full experience, you can also [build the kit](./hardware/README.md), which looks like this:
+
+<p>
+
+<img align="left" src="./hardware/assets/pcb-5.jpg" width="400">
+
+<img align="right" src="./hardware/assets/pcb-6.jpg" width="400">
+
+</p>
+
+<br clear="both">
+
 ## Features
 
 ### Tuning
 
 **Tuitar** offers real-time visualizations from [an input source](#input-modes) which can be used for tuning your guitar or other instruments.
 
-<img src="./assets/tuitar-frequency.gif" height="400">
+<img src="./assets/tuitar-frequency.gif" height="300">
 
 The **frequency** graph above shows the detected frequency of the input sound. When a fundamental frequency is detected, the closest musical note is being displayed with the respective [cents](<https://en.wikipedia.org/wiki/Cent_(music)>) with a bar at the top.
 
@@ -92,22 +141,22 @@ When the displayed note is green and the bar is centered, it means that the inpu
 
 The default (**live**) mode shows the currently pressed strings and frets:
 
-<img src="./assets/tuitar-fretboard-live.gif" height="400">
+<img src="./assets/tuitar-fretboard-live.gif" height="300">
 
 One fun thing you can do is to switch to **random** mode which is a small game where you get points by playing the correct notes shown on the screen. There is a timer and a score counter at the top.
 
-<img src="./assets/tuitar-fretboard-random.gif" height="400">
+<img src="./assets/tuitar-fretboard-random.gif" height="300">
 
 The **song** mode is also available which shows the notes of a pre-loaded song. It's useful for learning riffs, solos or any melody.
 
-<img src="./assets/tuitar-fretboard-song.gif" height="400">
+<img src="./assets/tuitar-fretboard-song.gif" height="300">
 
 > [!NOTE]  
 > You can load a song onto the device by placing the MIDI file (_.mid) or Guitar Pro file (_.gp3, _.gp4, _.gp5) into the `tuitar-core/songs` directory and re-flashing the [firmware](./firmware/README.md). This will be made more user-friendly in the future.
 
 The **scale** mode also helps with learning scales.
 
-<img src="./assets/tuitar-fretboard-scale.gif" height="400">
+<img src="./assets/tuitar-fretboard-scale.gif" height="300">
 
 The available scales are:
 
@@ -129,17 +178,19 @@ If you need additional information about the input signal, you can use the [wave
 
 #### Waveform
 
-<img src="./assets/tuitar-waveform.gif" height="400">
+<img src="./assets/tuitar-waveform.gif" height="300">
 
 Shows the raw audio signal over time. You can change the focused region in the chart by turning the knob. It is especially useful for debugging the input since the y-axis is simply shows a voltage from 0 to 3.3V.
 
 #### Spectrum
 
-<img src="./assets/tuitar-spectrum.gif" height="400">
+<img src="./assets/tuitar-spectrum.gif" height="300">
 
 Shows the frequency spectrum of the input signal. Especially useful for dB measurements and debugging the input. The x-axis is frequency in Hz while the y-axis is the amplitude in dB.
 
-## Input modes
+## UI
+
+### Input modes
 
 **Tuitar** currently supports **2** input modes:
 
@@ -148,7 +199,7 @@ Shows the frequency spectrum of the input signal. Especially useful for dB measu
 
 Press the **mode** button to switch between the input modes. The current mode is displayed at the left bottom corner of the screen. (`[M]` or `[J]`)
 
-## FPS
+### FPS
 
 The current FPS is being shown on the right bottom corner of the screen.
 
@@ -181,22 +232,6 @@ The controls are context-sensitive, meaning they change their function based on 
 | Mode button | Short press | Switch input mode (Mic ↔ Jack) |
 | Menu button | Short press | Go to the next tab              |
 | Ctrl knob   | Turn        | Scroll frequency chart          |
-
-## Terminal
-
-**Tuitar** also runs as a terminal application.
-
-To install:
-
-```sh
-cargo install tuitar --locked
-```
-
-Run:
-
-```sh
-tuitar
-```
 
 It only supports pitch detection and fretboard tracking for now, but you can use it to practice your guitar skills without the hardware.
 
@@ -233,11 +268,19 @@ Here are some demos from the development phase.
 
 **Tuitar** running on ESP32 T-Display:
 
-https://github.com/user-attachments/assets/1922a316-57ff-4f3d-92eb-5ba5ff0dfdd8
+<div align="center">
+
+<video src="https://github.com/user-attachments/assets/1922a316-57ff-4f3d-92eb-5ba5ff0dfdd8" alt="Tuitar on ESP32 T-Display">
+
+</div>
 
 With jack input:
 
-https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0
+<div align="center">
+
+<video src="https://github.com/user-attachments/assets/cdbdc811-790d-4dac-8dc4-51d49589d3c0" alt="Tuitar with jack input">
+
+</div>
 
 ## License & Contributions
 
