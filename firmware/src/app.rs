@@ -103,7 +103,7 @@ pub enum InputMode {
 }
 
 impl InputMode {
-    pub fn as_line(&self) -> Line {
+    pub fn as_line(&self) -> Line<'_> {
         let label = match self {
             InputMode::Mic => "M".red(),
             InputMode::Jack => "J".blue(),
@@ -155,7 +155,7 @@ impl Display for FretboardMode {
 }
 
 impl FretboardMode {
-    pub fn as_line(&self) -> Line {
+    pub fn as_line(&self) -> Line<'_> {
         let label = match self {
             FretboardMode::Live => "Live".green(),
             FretboardMode::Scale => "Scale".yellow(),
