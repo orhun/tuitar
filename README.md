@@ -92,7 +92,7 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 
 **Tuitar** was presented for the first time at [Rust Forge Conference](https://rustforgeconf.com/) in New Zealand.
 
-<a href="https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s"
+<a href="https://www.youtube.com/watch?v=es48dmNWMVQ&t=29905s"
    target="_blank"
    rel="noopener noreferrer">
 <img
@@ -102,7 +102,7 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
   />
 </a>
 
-▶️ [**https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s**](https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s)
+▶️ [**https://www.youtube.com/watch?v=es48dmNWMVQ&t=29905s**](https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s)
 
 ## Try it out!
 
