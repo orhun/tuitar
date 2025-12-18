@@ -17,7 +17,7 @@ documentation = "https://github.com/orhun/tuitar#"
 rust-version = "1.77"
 
 [workspace.dependencies]
-tuitar-core = { path = "tuitar-core" }
+tuitar-core = { path = "tuitar-core", version = "0.1.0" }
 ratatui-fretboard = { path = "ratatui-fretboard", version = "0.2.0" }
 
 ratatui = { version = "0.29.0", default-features = false }
