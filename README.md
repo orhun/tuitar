@@ -14,10 +14,10 @@
         <img src="https://img.shields.io/crates/v/tuitar?color=000000">
     </a>
     <a href="https://github.com/orhun/tuitar/actions?query=workflow%3A%22Continuous+Integration%22">
-        <img src="https://img.shields.io/github/actions/workflow/status/orhun/tuitar/ci.yml?branch=master&color=000000&label=CI">
+        <img src="https://img.shields.io/github/actions/workflow/status/orhun/tuitar/ci.yml?branch=main&color=000000&label=CI">
     </a>
     <a href="https://github.com/orhun/tuitar/blob/master/LICENSE">
-        <img src="https://img.shields.io/crates/l/tuitar?color=000000">
+        <img src="https://img.shields.io/crates/l/tuitar-core?color=000000">
     </a>
     <a href="https://github.com/ratatui/ratatui">
         <img src="https://ratatui.rs/built-with-ratatui/badge.svg">
