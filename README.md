@@ -68,7 +68,6 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
   - [Global](#global)
   - [Fretboard](#fretboard)
   - [Frequency/Spectrum/Waveform](#frequencyspectrumwaveform)
-- [Architecture](#architecture)
 - [Old Demos](#old-demos)
 - [License & Contributions](#license--contributions)
 - [Copyright](#copyright)
@@ -91,7 +90,7 @@ Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](
 
 ## Launch & Live Demo
 
-**Tuitar** was presented for the first time at Rust Forge Conference in New Zealand.
+**Tuitar** was presented for the first time at [Rust Forge Conference](https://rustforgeconf.com/) in New Zealand.
 
 <a href="https://www.youtube.com/watch?v=es48dmNWMVQ&t=32684s"
    target="_blank"
@@ -184,15 +183,25 @@ If you need additional information about the input signal, you can use the [wave
 
 #### Waveform
 
+Shows the raw audio signal over time. You can change the focused region in the chart by turning the knob. It is especially useful for debugging the input since the y-axis is simply shows a voltage from 0 to 3.3V.
+
+<details>
+  <summary>Click to see the demo</summary>
+
 <img src="./assets/tuitar-waveform.gif" height="300">
 
-Shows the raw audio signal over time. You can change the focused region in the chart by turning the knob. It is especially useful for debugging the input since the y-axis is simply shows a voltage from 0 to 3.3V.
+</details>
 
 #### Spectrum
 
+Shows the frequency spectrum of the input signal. Especially useful for dB measurements and debugging the input. The x-axis is frequency in Hz while the y-axis is the amplitude in dB.
+
+<details>
+  <summary>Click to see the demo</summary>
+
 <img src="./assets/tuitar-spectrum.gif" height="300">
 
-Shows the frequency spectrum of the input signal. Especially useful for dB measurements and debugging the input. The x-axis is frequency in Hz while the y-axis is the amplitude in dB.
+</details>
 
 ## UI
 
@@ -240,33 +249,6 @@ The controls are context-sensitive, meaning they change their function based on 
 | Ctrl knob   | Turn        | Scroll frequency chart          |
 
 It only supports pitch detection and fretboard tracking for now, but you can use it to practice your guitar skills without the hardware.
-
-## Architecture
-
-The codebase consists of the following crates:
-
-- [`tuitar-core`](./tuitar-core/README.md): The core logic and UI of **Tuitar**.
-- [`firmware`](./firmware/README.md): The firmware for the ESP32 hardware.
-- [`hardware`](./hardware/README.md): The hardware design files for the **Tuitar** kit.
-- [`tuitar`](./tuitar/README.md): The terminal application for **Tuitar**.
-- [`ratatui-fretboard`](./ratatui-fretboard/README.md): A crate for rendering fretboards in terminal applications using Ratatui.
-
-The dependency relationship is as follows:
-
-```
-tuitar-core
- └── ratatui-fretboard
-
-firmware
- ├── tuitar-core
- └── ratatui-fretboard
-
-tuitar
- ├── tuitar-core
- └── ratatui-fretboard
-
-hardware (no code deps)
-```
 
 ## Old Demos
 
