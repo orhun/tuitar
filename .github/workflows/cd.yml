@@ -37,7 +37,7 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
-          cargo publish -p ratatui-fretboard
           cargo publish -p tuitar-core
           cargo publish -p tuitar
-          cargo publish -p firmware
+          cd firmware/
+          cargo publish
