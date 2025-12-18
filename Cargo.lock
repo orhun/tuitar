@@ -2504,7 +2504,7 @@ dependencies = [
 
 [[package]]
 name = "tuitar"
-version = "0.1.0-rc.0"
+version = "0.1.0"
 dependencies = [
  "cpal",
  "pitchy",
@@ -2517,7 +2517,7 @@ dependencies = [
 
 [[package]]
 name = "tuitar-core"
-version = "0.1.0-rc.0"
+version = "0.1.0"
 dependencies = [
  "colorgrad",
  "guitarpro",
@@ -2532,7 +2532,7 @@ dependencies = [
 
 [[package]]
 name = "tuitar-firmware"
-version = "0.1.0-rc.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "embedded-graphics",
