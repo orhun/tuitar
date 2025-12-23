@@ -33,8 +33,10 @@
 _Learning how to play guitar with a TUI - hence "Tuitar"._
 
 **Tuitar** is a terminal-based guitar training tool that runs standalone on ESP32 hardware.  
-Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](./hardware/README.md) sections for more details.  
-[Click here to jump to the features](#features) ➡️
+Available as a DIY kit, see the [firmware](./firmware/README.md) and [hardware](./hardware/README.md) sections for more details.
+
+- [Jump to the features](#features) ➡️
+- [Read the Hackster.io article about the project](https://www.hackster.io/news/fret-not-this-esp32-gadget-makes-guitar-practice-a-breeze-dcc26bcef0ba) 📰
 
 </p>
 
